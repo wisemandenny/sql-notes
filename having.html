@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Diane Horton" />
+  <title>3 Filtering groups with HAVING</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.line-block{white-space: pre-line;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #a0a0a0;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #a0a0a0;  padding-left: 4px; }
+div.sourceCode
+  { color: #1f1c1b; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span. { color: #1f1c1b; } /* Normal */
+code span.al { color: #bf0303; background-color: #f7e6e6; font-weight: bold; } /* Alert */
+code span.an { color: #ca60ca; } /* Annotation */
+code span.at { color: #0057ae; } /* Attribute */
+code span.bn { color: #b08000; } /* BaseN */
+code span.bu { color: #644a9b; font-weight: bold; } /* BuiltIn */
+code span.cf { color: #1f1c1b; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #924c9d; } /* Char */
+code span.cn { color: #aa5500; } /* Constant */
+code span.co { color: #898887; } /* Comment */
+code span.cv { color: #0095ff; } /* CommentVar */
+code span.do { color: #607880; } /* Documentation */
+code span.dt { color: #0057ae; } /* DataType */
+code span.dv { color: #b08000; } /* DecVal */
+code span.er { color: #bf0303; text-decoration: underline; } /* Error */
+code span.ex { color: #0095ff; font-weight: bold; } /* Extension */
+code span.fl { color: #b08000; } /* Float */
+code span.fu { color: #644a9b; } /* Function */
+code span.im { color: #ff5500; } /* Import */
+code span.in { color: #b08000; } /* Information */
+code span.kw { color: #1f1c1b; font-weight: bold; } /* Keyword */
+code span.op { color: #1f1c1b; } /* Operator */
+code span.ot { color: #006e28; } /* Other */
+code span.pp { color: #006e28; } /* Preprocessor */
+code span.re { color: #0057ae; background-color: #e0e9f8; } /* RegionMarker */
+code span.sc { color: #3daee9; } /* SpecialChar */
+code span.ss { color: #ff5500; } /* SpecialString */
+code span.st { color: #bf0303; } /* String */
+code span.va { color: #0057ae; } /* Variable */
+code span.vs { color: #bf0303; } /* VerbatimString */
+code span.wa { color: #bf0303; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://www.teach.cs.toronto.edu/~csc343h/fall/tufte.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">3 Filtering groups with HAVING</h1>
+<p class="author">Diane Horton</p>
+</header>
+<section class="level1">
+<p>We’ve had lots of experience using a <code>WHERE</code> clause to filter individual tuples. For example</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb1-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span></a>
+<a class="sourceLine" id="cb1-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Offering</a>
+<a class="sourceLine" id="cb1-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> dept <span class="op">=</span> <span class="st">&#39;CSC&#39;</span>;</a></code></pre></div>
+<p>In the result table, we get exactly those rows that satisfy the <code>WHERE</code> condition. Similarly, we can filter <em>groups</em> using a <code>HAVING</code> clause. For example, suppose we want to know the average grade and the number of students in each offering of any course:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb2-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="kw">oid</span>, <span class="fu">avg</span>(grade), <span class="fu">count</span>(<span class="op">*</span>)  </a>
+<a class="sourceLine" id="cb2-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb2-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">oid</span>;</a>
+<a class="sourceLine" id="cb2-4" title="4">     <span class="kw">oid</span> |         <span class="fu">avg</span>         | <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb2-5" title="5">    <span class="co">-----+---------------------+-------</span></a>
+<a class="sourceLine" id="cb2-6" title="6">      <span class="dv">14</span> | <span class="fl">59.0000000000000000</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb2-7" title="7">      <span class="dv">34</span> | <span class="fl">60.6666666666666667</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb2-8" title="8">      <span class="dv">27</span> | <span class="fl">70.5000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb2-9" title="9">       <span class="dv">8</span> | <span class="fl">92.0000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb2-10" title="10">      <span class="dv">17</span> | <span class="fl">69.5000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb2-11" title="11">      <span class="dv">28</span> | <span class="fl">91.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb2-12" title="12">       <span class="dv">1</span> | <span class="fl">87.2500000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb2-13" title="13">      <span class="dv">15</span> | <span class="fl">31.0000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb2-14" title="14">      <span class="dv">26</span> | <span class="fl">71.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb2-15" title="15">      <span class="dv">11</span> | <span class="fl">79.0000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb2-16" title="16">      <span class="dv">38</span> | <span class="fl">92.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb2-17" title="17">      <span class="dv">16</span> | <span class="fl">73.5000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb2-18" title="18">      <span class="dv">39</span> | <span class="fl">97.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb2-19" title="19">       <span class="dv">6</span> | <span class="fl">74.0000000000000000</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb2-20" title="20">      <span class="dv">21</span> | <span class="fl">71.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb2-21" title="21">       <span class="dv">3</span> | <span class="fl">82.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb2-22" title="22">      <span class="dv">31</span> | <span class="fl">78.0000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb2-23" title="23">      <span class="dv">35</span> | <span class="fl">75.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb2-24" title="24">       <span class="dv">5</span> | <span class="fl">74.6666666666666667</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb2-25" title="25">      <span class="dv">13</span> | <span class="fl">95.6666666666666667</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb2-26" title="26">      <span class="dv">22</span> | <span class="fl">75.0000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb2-27" title="27">       <span class="dv">9</span> | <span class="fl">78.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb2-28" title="28">       <span class="dv">7</span> | <span class="fl">83.0000000000000000</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb2-29" title="29">    (<span class="dv">23</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>We might find the average interesting only in offerings with multiple students. We can filter out the other offerings with a <code>HAVING</code> clause:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb3-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="kw">oid</span>, <span class="fu">avg</span>(grade), <span class="fu">count</span>(<span class="op">*</span>)  </a>
+<a class="sourceLine" id="cb3-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb3-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">oid</span></a>
+<a class="sourceLine" id="cb3-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">HAVING</span> <span class="fu">count</span>(<span class="op">*</span>) <span class="op">&gt;</span> <span class="dv">1</span>;</a>
+<a class="sourceLine" id="cb3-5" title="5">     <span class="kw">oid</span> |         <span class="fu">avg</span>         | <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb3-6" title="6">    <span class="co">-----+---------------------+-------</span></a>
+<a class="sourceLine" id="cb3-7" title="7">      <span class="dv">14</span> | <span class="fl">59.0000000000000000</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb3-8" title="8">      <span class="dv">34</span> | <span class="fl">60.6666666666666667</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb3-9" title="9">      <span class="dv">27</span> | <span class="fl">70.5000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb3-10" title="10">       <span class="dv">8</span> | <span class="fl">92.0000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb3-11" title="11">      <span class="dv">17</span> | <span class="fl">69.5000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb3-12" title="12">       <span class="dv">1</span> | <span class="fl">87.2500000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb3-13" title="13">      <span class="dv">15</span> | <span class="fl">31.0000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb3-14" title="14">      <span class="dv">11</span> | <span class="fl">79.0000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb3-15" title="15">      <span class="dv">16</span> | <span class="fl">73.5000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb3-16" title="16">       <span class="dv">6</span> | <span class="fl">74.0000000000000000</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb3-17" title="17">      <span class="dv">31</span> | <span class="fl">78.0000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb3-18" title="18">       <span class="dv">5</span> | <span class="fl">74.6666666666666667</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb3-19" title="19">      <span class="dv">13</span> | <span class="fl">95.6666666666666667</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb3-20" title="20">      <span class="dv">22</span> | <span class="fl">75.0000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb3-21" title="21">       <span class="dv">7</span> | <span class="fl">83.0000000000000000</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb3-22" title="22">    (<span class="dv">15</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>We can also filter according to the value of an unaggregated attribute:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb4-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="kw">oid</span>, <span class="fu">avg</span>(grade), <span class="fu">count</span>(<span class="op">*</span>)</a>
+<a class="sourceLine" id="cb4-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb4-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">oid</span></a>
+<a class="sourceLine" id="cb4-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">HAVING</span> <span class="kw">oid</span> <span class="op">&gt;</span> <span class="dv">10</span>;</a>
+<a class="sourceLine" id="cb4-5" title="5">     <span class="kw">oid</span> |         <span class="fu">avg</span>         | <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb4-6" title="6">    <span class="co">-----+---------------------+-------</span></a>
+<a class="sourceLine" id="cb4-7" title="7">      <span class="dv">14</span> | <span class="fl">59.0000000000000000</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb4-8" title="8">      <span class="dv">34</span> | <span class="fl">60.6666666666666667</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb4-9" title="9">      <span class="dv">27</span> | <span class="fl">70.5000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb4-10" title="10">      <span class="dv">17</span> | <span class="fl">69.5000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb4-11" title="11">      <span class="dv">28</span> | <span class="fl">91.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb4-12" title="12">      <span class="dv">15</span> | <span class="fl">31.0000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb4-13" title="13">      <span class="dv">26</span> | <span class="fl">71.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb4-14" title="14">      <span class="dv">11</span> | <span class="fl">79.0000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb4-15" title="15">      <span class="dv">38</span> | <span class="fl">92.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb4-16" title="16">      <span class="dv">16</span> | <span class="fl">73.5000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb4-17" title="17">      <span class="dv">39</span> | <span class="fl">97.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb4-18" title="18">      <span class="dv">21</span> | <span class="fl">71.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb4-19" title="19">      <span class="dv">31</span> | <span class="fl">78.0000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb4-20" title="20">      <span class="dv">35</span> | <span class="fl">75.0000000000000000</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb4-21" title="21">      <span class="dv">13</span> | <span class="fl">95.6666666666666667</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb4-22" title="22">      <span class="dv">22</span> | <span class="fl">75.0000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb4-23" title="23">    (<span class="dv">16</span> <span class="kw">rows</span>)</a></code></pre></div>
+<h2 id="restrictions-on-having-clauses">Restrictions on HAVING clauses</h2>
+<p>A <code>HAVING</code> clause may refer to an attribute only if it is either aggregated or is an attribute on the GROUP BY list. This is the same requirement as for SELECT clauses with aggregation, and it makes sense for the same reason. It’s all to do with quantities.</p>
+<p>Here’s an example. It’s the same query we just saw, but this time we filter using grade unaggregated</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb5-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="kw">oid</span>, <span class="fu">avg</span>(grade), <span class="fu">count</span>(<span class="op">*</span>)  </a>
+<a class="sourceLine" id="cb5-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb5-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">oid</span></a>
+<a class="sourceLine" id="cb5-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">HAVING</span> grade <span class="op">&lt;</span> <span class="dv">50</span>;  </a>
+<a class="sourceLine" id="cb5-5" title="5">    ERROR:  <span class="kw">column</span> <span class="ot">&quot;took.grade&quot;</span> must appear <span class="kw">in</span> <span class="kw">the</span> <span class="kw">GROUP</span> <span class="kw">BY</span> clause <span class="kw">or</span> be used <span class="kw">in</span> an aggregate <span class="kw">function</span></a>
+<a class="sourceLine" id="cb5-6" title="6">    LINE <span class="dv">4</span>: <span class="kw">HAVING</span> grade <span class="op">&lt;</span> <span class="dv">50</span>;</a>
+<a class="sourceLine" id="cb5-7" title="7">                   ^</a></code></pre></div>
+<p>It makes complete sense that this doesn’t work. We have grouped by oid, so there will be one row per oid (for oids that pass the filter). But the filter is <code>grade &lt; 50</code>, and there is not just one grade to check per oid.</p>
+<p>If we change the filter to min(grade) &lt; 50, the query makes sense again. There is only one minimum grade per oid, so we can compare it to 50.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb6-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="co">-- We include a column for min(grade) so we can observe</span></a>
+<a class="sourceLine" id="cb6-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="co">-- that the filter is working.</span></a>
+<a class="sourceLine" id="cb6-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="kw">oid</span>, <span class="fu">min</span>(grade), <span class="fu">avg</span>(grade), <span class="fu">count</span>(<span class="op">*</span>)</a>
+<a class="sourceLine" id="cb6-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb6-5" title="5">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">oid</span></a>
+<a class="sourceLine" id="cb6-6" title="6">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">HAVING</span> <span class="fu">min</span>(grade) <span class="op">&lt;</span> <span class="dv">50</span>;</a>
+<a class="sourceLine" id="cb6-7" title="7">     <span class="kw">oid</span> | <span class="fu">min</span> |         <span class="fu">avg</span>         | <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb6-8" title="8">    <span class="co">-----+-----+---------------------+-------</span></a>
+<a class="sourceLine" id="cb6-9" title="9">      <span class="dv">14</span> |  <span class="dv">39</span> | <span class="fl">59.0000000000000000</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb6-10" title="10">      <span class="dv">34</span> |  <span class="dv">45</span> | <span class="fl">60.6666666666666667</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb6-11" title="11">      <span class="dv">17</span> |  <span class="dv">46</span> | <span class="fl">69.5000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb6-12" title="12">      <span class="dv">15</span> |   <span class="dv">0</span> | <span class="fl">31.0000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb6-13" title="13">      <span class="dv">11</span> |  <span class="dv">39</span> | <span class="fl">79.0000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb6-14" title="14">      <span class="dv">16</span> |  <span class="dv">17</span> | <span class="fl">73.5000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb6-15" title="15">    (<span class="dv">6</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>We can even filter on something that is not in the <code>SELECT</code> clause. Here we have the same query, except that we have taken <code>min(grade)</code> out of the <code>SELECT</code> clause so that it is not reported in the result. The query still works.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb7-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="kw">oid</span>, <span class="fu">avg</span>(grade), <span class="fu">count</span>(<span class="op">*</span>)</a>
+<a class="sourceLine" id="cb7-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb7-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> <span class="kw">oid</span></a>
+<a class="sourceLine" id="cb7-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">HAVING</span> <span class="fu">min</span>(grade) <span class="op">&lt;</span> <span class="dv">50</span>;</a>
+<a class="sourceLine" id="cb7-5" title="5">     <span class="kw">oid</span> |         <span class="fu">avg</span>         | <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb7-6" title="6">    <span class="co">-----+---------------------+-------</span></a>
+<a class="sourceLine" id="cb7-7" title="7">      <span class="dv">14</span> | <span class="fl">59.0000000000000000</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb7-8" title="8">      <span class="dv">34</span> | <span class="fl">60.6666666666666667</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb7-9" title="9">      <span class="dv">17</span> | <span class="fl">69.5000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb7-10" title="10">      <span class="dv">15</span> | <span class="fl">31.0000000000000000</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb7-11" title="11">      <span class="dv">11</span> | <span class="fl">79.0000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb7-12" title="12">      <span class="dv">16</span> | <span class="fl">73.5000000000000000</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb7-13" title="13">    (<span class="dv">6</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>Note that the <code>HAVING</code> clause is executed <em>before</em> the <code>SELECT</code> clause, so the <code>SELECT</code> has not yet filtered out the <code>grade</code> column.</p>
+<!-- 
+
+This should be postponed until after we cover subqueries.  And in fact,
+it doesn't feel necessary to say any of it; it's quite obvious at that
+point.  Leaving it here in case we change our minds later.
+
+## HAVING clauses in a subquery
+
+We said earlier that
+a `HAVING` clause may refer to an attribute only if it is either
+aggregated or is an attribute on the GROUP BY list.
+In fact,
+if the `HAVING` clause is in a subquery,
+it can refer to other things as well:
+attributes from the "outer" query.
+For example, these are a perfectly fine queries:
+
+```SQL
+csc343h-prof=> SELECT sid FROM Took T1 WHERE oid in
+(SELECT oid FROM Took T2 GROUP BY oid HAVING T1.grade < 50);
+  sid  
+-------
+ 99132
+   157
+ 11111
+ 11111
+ 11111
+ 11111
+ 11111
+(7 rows)
+
+csc343h-prof=> SELECT sid FROM Took T1 WHERE grade < SOME
+(SELECT avg(grade) FROM Took T2 GROUP BY oid HAVING T1.grade < 50);
+  sid  
+-------
+ 99132
+   157
+ 11111
+ 11111
+ 11111
+ 11111
+ 11111
+(7 rows)
+```
+-->
+<h1 id="order-of-execution">Order of execution:</h1>
+<p>Now that we know all the possible clauses in a SELECT-FROM-WHERE query, we can consider the order of execution. It is as follows:</p>
+<ol type="1">
+<li>FROM clause: This determines what table(s) will be examined.
+<ul>
+<li>If there is more than one, the tables are joined together as specified. In any case, the rows are iterated over.</li>
+</ul></li>
+<li>WHERE clause: This filters rows.
+<ul>
+<li>Notice that the SELECT has not happened yet, so we can’t reference any column names that it defines. So, for instance, we can’t say:</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">SELECT</span> grade <span class="kw">as</span> Result, sid</a>
+<a class="sourceLine" id="cb8-2" title="2"><span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb8-3" title="3"><span class="kw">WHERE</span> Result <span class="op">&gt;</span> <span class="dv">50</span>;</a></code></pre></div></li>
+<li>GROUP BY clause: This organizes the rows into groups, each of which will be represented by one row in the result table.
+<ul>
+<li>If there is also a HAVING clause, only groups that pass its filter are included.</li>
+</ul></li>
+<li>HAVING clause: This filters groups.
+<ul>
+<li>Since this happens before the SELECT clause, it can refer to attributes that are not included in the SELECT.</li>
+</ul></li>
+<li>SELECT clause: This chooses which columns to include in the result.
+<ul>
+<li>It may introduce new column names.</li>
+</ul></li>
+<li>ORDER BY clause: This sorts the rows of the result table.
+<ul>
+<li>Since it occurs after the SELECT clause, it can reference column names that are introduced there. So, for instance, we can say:</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">SELECT</span> grade <span class="kw">as</span> Result, sid</a>
+<a class="sourceLine" id="cb9-2" title="2"><span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb9-3" title="3"><span class="kw">ORDER</span> <span class="kw">BY</span> Result;</a></code></pre></div></li>
+</ol>
+</section>
+</body>
+</html>

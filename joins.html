@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Diane Horton" />
+  <title>7 Joins</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.line-block{white-space: pre-line;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #a0a0a0;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #a0a0a0;  padding-left: 4px; }
+div.sourceCode
+  { color: #1f1c1b; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span. { color: #1f1c1b; } /* Normal */
+code span.al { color: #bf0303; background-color: #f7e6e6; font-weight: bold; } /* Alert */
+code span.an { color: #ca60ca; } /* Annotation */
+code span.at { color: #0057ae; } /* Attribute */
+code span.bn { color: #b08000; } /* BaseN */
+code span.bu { color: #644a9b; font-weight: bold; } /* BuiltIn */
+code span.cf { color: #1f1c1b; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #924c9d; } /* Char */
+code span.cn { color: #aa5500; } /* Constant */
+code span.co { color: #898887; } /* Comment */
+code span.cv { color: #0095ff; } /* CommentVar */
+code span.do { color: #607880; } /* Documentation */
+code span.dt { color: #0057ae; } /* DataType */
+code span.dv { color: #b08000; } /* DecVal */
+code span.er { color: #bf0303; text-decoration: underline; } /* Error */
+code span.ex { color: #0095ff; font-weight: bold; } /* Extension */
+code span.fl { color: #b08000; } /* Float */
+code span.fu { color: #644a9b; } /* Function */
+code span.im { color: #ff5500; } /* Import */
+code span.in { color: #b08000; } /* Information */
+code span.kw { color: #1f1c1b; font-weight: bold; } /* Keyword */
+code span.op { color: #1f1c1b; } /* Operator */
+code span.ot { color: #006e28; } /* Other */
+code span.pp { color: #006e28; } /* Preprocessor */
+code span.re { color: #0057ae; background-color: #e0e9f8; } /* RegionMarker */
+code span.sc { color: #3daee9; } /* SpecialChar */
+code span.ss { color: #ff5500; } /* SpecialString */
+code span.st { color: #bf0303; } /* String */
+code span.va { color: #0057ae; } /* Variable */
+code span.vs { color: #bf0303; } /* VerbatimString */
+code span.wa { color: #bf0303; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://www.teach.cs.toronto.edu/~csc343h/fall/tufte.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">7 Joins</h1>
+<p class="author">Diane Horton</p>
+</header>
+<section class="level1">
+<p>So far, we’ve seen only Cartesian product. But all the joins you know from relational algebra have a counterpart in SQL. Any of them can go in a <code>FROM</code> clause:</p>
+<p><img src="./images/basic-joins.jpg" alt="Basic types of join" width="300"/></p>
+<h2 id="dangling-tuples">Dangling tuples</h2>
+<p>When we join tables R and S using <code>NATURAL JOIN</code> or using <code>JOIN ON</code>, a condition must be met in order for a given combination of a tuple r from R and a tuple s from S to be included in the result: With <code>NATURAL JOIN</code>, r and s must agree on all attributes of the same name; with <code>JOIN ON</code>, they must satisfy the join condition.</p>
+<p>But what if there is a row r in R that doesn’t satisfy the condition with <em>any</em> of the rows of S? Or a row s from S that never finds a partner in table R? These tuples are entirely missing from the result. Here’s an example:</p>
+<p><img src="./images/natural-join.jpg" alt="Natural join" width="350"/></p>
+<p>The tuple &lt;4, 5&gt; from R is not represented in the result, nor is the tuple &lt;6, 7&gt; from S. (We call these <strong>dangling tuples</strong>.) If we want such tuples included in the result, there is another class of joins that can include them, called outer joins.</p>
+<h2 id="outer-joins">Outer joins</h2>
+<p>An <strong>outer join</strong> preserves these dangling tuples by padding them with null values where needed. For example, &lt;4, 5&gt; has no tuple from S that can partner with it and provide a value in column C, so it gets a null in that column. (The joins we learned earlier don’t pad with nulls, and are called an <strong>inner joins</strong>.)</p>
+<p>There are three kinds of outer join. A <strong>left outer join</strong> preserves dangling tuples from the table on the left-hand side only. For example:</p>
+<p><img src="./images/left.jpg" alt="Left outer join" width="350"/></p>
+<p>Here, row &lt;4, 5&gt; from the left-hand table, R, is preserved in the result. But row &lt;6, 7&gt; from the right-hand table, S, is not preserved.</p>
+<p>A <strong>right outer join</strong> preserves dangling tuples from the table on the right-hand side only. For example:</p>
+<p><img src="./images/right.jpg" alt="Right outer join" width="350"/></p>
+<p>A <strong>full outer join</strong> does both. For example:</p>
+<p><img src="./images/full.jpg" alt="Full outer join" width="350"/></p>
+<h2 id="sql-syntax-for-outer-joins">SQL syntax for outer joins</h2>
+<p>Only a <code>NATURAL JOIN</code> or a <code>JOIN ON</code> (theta join) can leave dangling tuples, so only they have the option to be either an inner or an outer join. To get an outer join, we can simply say <code>LEFT OUTER</code>, <code>RIGHT OUTER</code>, or <code>FULL OUTER</code> immediately before the word <code>JOIN</code>. In fact, we don’t have to say <code>OUTER</code>, since simply saying <code>LEFT</code>, <code>RIGHT</code> or <code>FULL</code> implies that it is an outer join. If we say nothing, we get the regular inner join that you learned about earlier.</p>
+<p>To summarize, these are all the kinds of join expression that we have seen:</p>
+<p><img src="./images/join-summary.jpg" alt="Summary of join expressions" width="350"/></p>
+<h2 id="a-visual-representation">A visual representation</h2>
+<p>You may wonder why we use the terms “inner” and “outer” join. Venn diagrams make this clear.</p>
+<p>Recall our schema for a simple university database:</p>
+<ul>
+<li>Student(<strong>sID</strong>, surName, firstName, campus, email, cgpa)</li>
+<li>Course(<strong>dept, cnum</strong>, name, breadth)</li>
+<li>Offering(<strong>oID</strong>, dept, cNum, term, instructor)</li>
+<li>Took(<strong>sID, oID</strong>, grade)</li>
+<li><em>and the foreign key relationships that you will recall</em></li>
+</ul>
+<p>Let’s look at an inner natural join and all the varieties of outer natural join between <code>Student</code> and <code>Took</code>. (The same observations would hold with a <code>JOIN ON</code> between <code>Student</code> and <code>Took</code>.) Because these tables have the attribute <code>sID</code> in common, and no others, a natural join will only keep combinations of a row from Student and a row from Took with the same <code>sID</code>. But depending on the kind of natural join we pick, <code>sID</code>s that appear in only one of the tables may also be included.</p>
+<p>We will draw Venn diagrams to show the <code>sIDs</code> in table <code>Student</code>, the <code>sIDs</code> in table <code>Took</code>, and the <code>sIDs</code> in the intersection. We can then highlight the <code>siDs</code> that will appear in the result of the query.</p>
+<h3 id="inner-join">Inner join</h3>
+<p>This inner natural join:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb1-1" title="1">    <span class="kw">SELECT</span> sID, surname, grade</a>
+<a class="sourceLine" id="cb1-2" title="2">    <span class="kw">FROM</span> Student <span class="kw">NATURAL</span> <span class="kw">JOIN</span> Took;</a></code></pre></div>
+<p>will include only the <code>sID</code> values that are in the <em>intersection</em> of <code>Student</code> and <code>Took</code>:</p>
+<p><img src="./images/Inner-venn-crop.jpg" alt="Venn diagram of inner join" width="350"/></p>
+<h3 id="full-outer-join">Full outer join</h3>
+<p>A full outer join:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb2-1" title="1">    <span class="kw">SELECT</span> sID, surname, grade</a>
+<a class="sourceLine" id="cb2-2" title="2">    <span class="kw">FROM</span> Student <span class="kw">NATURAL</span> <span class="kw">FULL</span> <span class="kw">JOIN</span> Took;</a></code></pre></div>
+<p>will include all <code>sID</code> values that are in the <em>union</em>:</p>
+<p><img src="./images/Full-venn-crop.jpg" alt="Venn diagram of full outer join" width="350"/></p>
+<h3 id="left-outer-join">Left outer join</h3>
+<p>A left outer join:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb3-1" title="1">    <span class="kw">SELECT</span> sID, surname, grade</a>
+<a class="sourceLine" id="cb3-2" title="2">    <span class="kw">FROM</span> Student <span class="kw">NATURAL</span> <span class="kw">LEFT</span> <span class="kw">JOIN</span> Took;</a></code></pre></div>
+<p>will include all <code>sID</code> values that are in the union <em>plus</em> those that are in <code>Student</code> only:</p>
+<p><img src="./images/Left-venn-crop.jpg" alt="Venn diagram of left outer join" width="350"/></p>
+<h3 id="right-outer-join">Right outer join</h3>
+<p>A right outer join:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb4-1" title="1">    <span class="kw">SELECT</span> sID, surname, grade</a>
+<a class="sourceLine" id="cb4-2" title="2">    <span class="kw">FROM</span> Student <span class="kw">NATURAL</span> <span class="kw">RIGHT</span> <span class="kw">JOIN</span> Took;</a></code></pre></div>
+<p>will include all <code>sID</code> values that are in the union <em>plus</em> those that are in <code>Took</code> only:</p>
+<p><img src="./images/Right-venn-crop.jpg" alt="Venn diagram of right outer join" width="350"/></p>
+<h2 id="natural-join-is-brittle">Natural join is brittle</h2>
+<p>There is a practical matter to consider about natural join.</p>
+<p>Here is a perfectly sensible query on our university database:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb5-1" title="1">    <span class="kw">SELECT</span> sID, instructor</a>
+<a class="sourceLine" id="cb5-2" title="2">    <span class="kw">FROM</span> Student <span class="kw">NATURAL</span> <span class="kw">JOIN</span> Took</a>
+<a class="sourceLine" id="cb5-3" title="3">                 <span class="kw">NATURAL</span> <span class="kw">JOIN</span> Offering</a>
+<a class="sourceLine" id="cb5-4" title="4">    <span class="kw">WHERE</span> grade <span class="op">&gt;</span> <span class="dv">50</span>;</a></code></pre></div>
+<p>Suppose we wanted to extend the database so that it records the campus on which an offering of a course occurred. It would make sense, then, to add a <code>campus</code> column to the <code>Offering</code> table. What would happen to our query? The meaning of the query would change, and it would likely return far fewer rows. (Be sure you can see the difference the slightly modified schema makes.) This isn’t a good thing! We wouldn’t want a simple extension to our schema to change the meaning of any already-written queries.</p>
+<p>So we’ve see that natural join is “brittle” – it breaks easily. This is because the join condition is out of the programmer’s control: It is inferred from the schema rather than explicitly written by the programmer. We could, instead, make it explicit, either with a Cartesian product and a <code>WHERE</code> clause:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb6-1" title="1">    <span class="kw">SELECT</span> Student.sID, instructor</a>
+<a class="sourceLine" id="cb6-2" title="2">    <span class="kw">FROM</span> Student, Took, Offering</a>
+<a class="sourceLine" id="cb6-3" title="3">    <span class="kw">WHERE</span> Student.sid <span class="op">=</span> Took.sid <span class="kw">and</span></a>
+<a class="sourceLine" id="cb6-4" title="4">          Took.<span class="kw">oid</span> <span class="op">=</span> Offering.<span class="kw">oid</span> <span class="kw">and</span></a>
+<a class="sourceLine" id="cb6-5" title="5">          grade <span class="op">&gt;</span> <span class="dv">50</span>;</a></code></pre></div>
+<p>(Notice that we must disambiguate which <code>sID</code> we mean, either <code>Student.sID</code> or <code>Took.sID</code>, even though we know from the <code>WHERE</code> clause that they have the same value.) Or we could make the join condition explicity by using a <code>JOIN ON</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb7-1" title="1">    <span class="kw">SELECT</span> Student.sID, instructor</a>
+<a class="sourceLine" id="cb7-2" title="2">    <span class="kw">FROM</span> Student <span class="kw">JOIN</span> Took <span class="kw">ON</span> Student.sid <span class="op">=</span> Took.sid</a>
+<a class="sourceLine" id="cb7-3" title="3">                 <span class="kw">JOIN</span> Offering <span class="kw">ON</span> Took.<span class="kw">oid</span> <span class="op">=</span> Offering.<span class="kw">oid</span></a>
+<a class="sourceLine" id="cb7-4" title="4">    <span class="kw">WHERE</span> grade <span class="op">&gt;</span> <span class="dv">50</span>;</a></code></pre></div>
+<p>Either way, our query is less brittle; it does the same thing regardless of whether or not we have the extra <code>campus</code> column in table <code>Offering</code>, The meaning of the query is also more clear, since nothing is hidden.</p>
+<p>Of these two approaches, it is arguably better to use <code>JOIN ON</code>, because it nicely separates the join condition from the actual filtering that we wish to do. And if we wish to use an outer join, we <em>must</em> use <code>JOIN ON</code>.</p>
+<h2 id="one-more-kind-of-join-join-using">One more kind of join: JOIN USING</h2>
+<p>There is another kind of join in SQL: <code>JOIN USING</code>. It is like a natural join except that you specify which, among the columns that occur in both tables, will be forced to match. For example, we could write:</p>
+<pre><code>    SELECT sID, instructor
+    FROM Student JOIN Took USING (sID)
+                 JOIN Offering USING (oID)
+    WHERE grade &gt; 50;</code></pre>
+<p>Notice that we no longer have to disambiguate <code>sID</code>. This is because, as in a natural join, only one column for <code>sID</code> is in the result of the join. Also notice a small synctactic detail: we must use round brackets to enclose our list of attributes to be matched, even if there is only one.</p>
+<p>Because we name the attributes to be matched, a <code>JOIN USING</code> does not have the brittleness of natural join. However, the attributes that we specify for matching must have the same name in the tables being joined. If we want to match attributes with different names, or to enforce any other kind of join condition, we can use <code>JOIN ON</code>.</p>
+<p>See the excellent <a href="https://www.postgresql.org/docs/9.1/static/queries-table-expressions.html#QUERIES-FROM">PostgreSQL Documentation</a> for further details.</p>
+</section>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Diane Horton" />
+  <title>4 Views</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.line-block{white-space: pre-line;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #a0a0a0;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #a0a0a0;  padding-left: 4px; }
+div.sourceCode
+  { color: #1f1c1b; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span. { color: #1f1c1b; } /* Normal */
+code span.al { color: #bf0303; background-color: #f7e6e6; font-weight: bold; } /* Alert */
+code span.an { color: #ca60ca; } /* Annotation */
+code span.at { color: #0057ae; } /* Attribute */
+code span.bn { color: #b08000; } /* BaseN */
+code span.bu { color: #644a9b; font-weight: bold; } /* BuiltIn */
+code span.cf { color: #1f1c1b; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #924c9d; } /* Char */
+code span.cn { color: #aa5500; } /* Constant */
+code span.co { color: #898887; } /* Comment */
+code span.cv { color: #0095ff; } /* CommentVar */
+code span.do { color: #607880; } /* Documentation */
+code span.dt { color: #0057ae; } /* DataType */
+code span.dv { color: #b08000; } /* DecVal */
+code span.er { color: #bf0303; text-decoration: underline; } /* Error */
+code span.ex { color: #0095ff; font-weight: bold; } /* Extension */
+code span.fl { color: #b08000; } /* Float */
+code span.fu { color: #644a9b; } /* Function */
+code span.im { color: #ff5500; } /* Import */
+code span.in { color: #b08000; } /* Information */
+code span.kw { color: #1f1c1b; font-weight: bold; } /* Keyword */
+code span.op { color: #1f1c1b; } /* Operator */
+code span.ot { color: #006e28; } /* Other */
+code span.pp { color: #006e28; } /* Preprocessor */
+code span.re { color: #0057ae; background-color: #e0e9f8; } /* RegionMarker */
+code span.sc { color: #3daee9; } /* SpecialChar */
+code span.ss { color: #ff5500; } /* SpecialString */
+code span.st { color: #bf0303; } /* String */
+code span.va { color: #0057ae; } /* Variable */
+code span.vs { color: #bf0303; } /* VerbatimString */
+code span.wa { color: #bf0303; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://www.teach.cs.toronto.edu/~csc343h/fall/tufte.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">4 Views</h1>
+<p class="author">Diane Horton</p>
+</header>
+<section class="level1">
+<h2 id="life-without-views">Life without views</h2>
+<p>In a DBMS, a table must by physically stored. We never have to concern ourselves about how or where it is stored, but we know the DBMS will take care of that.</p>
+<p>Sometimes we want to define new things in terms of old things. For example, we might want to define which students are on the Dean’s Honours List in a given term in terms of the table that stores grades and the table that stores information about offerings of courses. We could do this by creating a new table, and putting the correct data into it:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb1-1" title="1">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">CREATE</span> <span class="kw">TABLE</span> DeansHonours (sid <span class="dt">integer</span>, term <span class="dt">integer</span>, average <span class="dt">float</span>);</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">CREATE</span> <span class="kw">TABLE</span></a>
+<a class="sourceLine" id="cb1-3" title="3">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">INSERT</span> <span class="kw">INTO</span> DeansHonours</a>
+<a class="sourceLine" id="cb1-4" title="4"><span class="kw">SELECT</span> sid, term, <span class="fu">avg</span>(grade)</a>
+<a class="sourceLine" id="cb1-5" title="5"><span class="kw">FROM</span> Took <span class="kw">JOIN</span> Offering <span class="kw">ON</span> Took.<span class="kw">oid</span> <span class="op">=</span> Offering.<span class="kw">oid</span></a>
+<a class="sourceLine" id="cb1-6" title="6"><span class="kw">GROUP</span> <span class="kw">BY</span> sid, term</a>
+<a class="sourceLine" id="cb1-7" title="7"><span class="kw">HAVING</span> <span class="fu">avg</span>(grade) <span class="op">&gt;</span> <span class="dv">80</span>;</a>
+<a class="sourceLine" id="cb1-8" title="8"><span class="kw">INSERT</span> <span class="dv">0</span> <span class="dv">3</span></a>
+<a class="sourceLine" id="cb1-9" title="9"></a>
+<a class="sourceLine" id="cb1-10" title="10">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> DeansHonours;</a>
+<a class="sourceLine" id="cb1-11" title="11">  sid  | term  |     average      </a>
+<a class="sourceLine" id="cb1-12" title="12"><span class="co">-------+-------+------------------</span></a>
+<a class="sourceLine" id="cb1-13" title="13"> <span class="dv">98000</span> | <span class="dv">20081</span> |               <span class="dv">82</span></a>
+<a class="sourceLine" id="cb1-14" title="14"> <span class="dv">98000</span> | <span class="dv">20089</span> |             <span class="fl">83.8</span></a>
+<a class="sourceLine" id="cb1-15" title="15"> <span class="dv">99999</span> | <span class="dv">20089</span> | <span class="fl">88.5555555555556</span></a>
+<a class="sourceLine" id="cb1-16" title="16">(<span class="dv">3</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>This works nicely, but suppose we change a student’s grades.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb2-1" title="1">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="co">-- Add a new grade for student 98000.</span></a>
+<a class="sourceLine" id="cb2-2" title="2">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">INSERT</span> <span class="kw">INTO</span> Took <span class="kw">values</span> (<span class="dv">98000</span>, <span class="dv">32</span>, <span class="dv">100</span>);</a>
+<a class="sourceLine" id="cb2-3" title="3"><span class="kw">INSERT</span> <span class="dv">0</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb2-4" title="4"></a>
+<a class="sourceLine" id="cb2-5" title="5">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="co">-- Offering 32 took place in term 20081.</span></a>
+<a class="sourceLine" id="cb2-6" title="6">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> Offering <span class="kw">WHERE</span> <span class="kw">oid</span> <span class="op">=</span> <span class="dv">32</span>;</a>
+<a class="sourceLine" id="cb2-7" title="7"> <span class="kw">oid</span> | cnum | dept | term  | instructor </a>
+<a class="sourceLine" id="cb2-8" title="8"><span class="co">-----+------+------+-------+------------</span></a>
+<a class="sourceLine" id="cb2-9" title="9">  <span class="dv">32</span> |  <span class="dv">216</span> | EEB  | <span class="dv">20081</span> | Suzuki</a>
+<a class="sourceLine" id="cb2-10" title="10">(<span class="dv">1</span> <span class="kw">row</span>)</a></code></pre></div>
+<p>The average for student 98000 in term 20081 should be pulled up by the 100 that we inserted. But it is not:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb3-1" title="1">csc343h<span class="op">-</span>dianeh<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> DeansHonours;</a>
+<a class="sourceLine" id="cb3-2" title="2">  sid  | term  |     average      </a>
+<a class="sourceLine" id="cb3-3" title="3"><span class="co">-------+-------+------------------</span></a>
+<a class="sourceLine" id="cb3-4" title="4"> <span class="dv">98000</span> | <span class="dv">20081</span> |               <span class="dv">82</span></a>
+<a class="sourceLine" id="cb3-5" title="5"> <span class="dv">98000</span> | <span class="dv">20089</span> |             <span class="fl">83.8</span></a>
+<a class="sourceLine" id="cb3-6" title="6"> <span class="dv">99999</span> | <span class="dv">20089</span> | <span class="fl">88.5555555555556</span></a>
+<a class="sourceLine" id="cb3-7" title="7">(<span class="dv">3</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>This is because we computed and stored table DeansHonours, and we never asked to change what’s in that table. Another symptom of having stored DeansHonours as a table is that if a student should be added or dropped from the Dean’s Honours List because of a grade change, table DeansHonours will not reflect that either.</p>
+<p>If we want to recompute the averages of Dean’s Honours list students, we will see the correct results:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb4-1" title="1">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, term, <span class="fu">avg</span>(grade)</a>
+<a class="sourceLine" id="cb4-2" title="2">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took <span class="kw">JOIN</span> Offering <span class="kw">ON</span> Took.<span class="kw">oid</span> <span class="op">=</span> Offering.<span class="kw">oid</span></a>
+<a class="sourceLine" id="cb4-3" title="3">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> sid, term</a>
+<a class="sourceLine" id="cb4-4" title="4">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">HAVING</span> <span class="fu">avg</span>(grade) <span class="op">&gt;</span> <span class="dv">80</span>;</a>
+<a class="sourceLine" id="cb4-5" title="5">  sid  | term  |         <span class="fu">avg</span>         </a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co">-------+-------+---------------------</span></a>
+<a class="sourceLine" id="cb4-7" title="7"> <span class="dv">98000</span> | <span class="dv">20081</span> | <span class="fl">85.0000000000000000</span></a>
+<a class="sourceLine" id="cb4-8" title="8"> <span class="dv">98000</span> | <span class="dv">20089</span> | <span class="fl">83.8000000000000000</span></a>
+<a class="sourceLine" id="cb4-9" title="9"> <span class="dv">99999</span> | <span class="dv">20089</span> | <span class="fl">88.5555555555555556</span></a>
+<a class="sourceLine" id="cb4-10" title="10">(<span class="dv">3</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>This is because we are computing this query from the now-revised Took table.</p>
+<h2 id="life-with-virtual-views">Life with (virtual) views</h2>
+<p>Views give us an alternative way to define new things in terms of old things. When we define a view, we aren’t asking SQL to compute anything; we are just asking it to remember a definition. For example, this code:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb5-1" title="1">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">CREATE</span> <span class="kw">VIEW</span> DeansHonoursStudents <span class="kw">AS</span></a>
+<a class="sourceLine" id="cb5-2" title="2">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">SELECT</span> sid, term, <span class="fu">avg</span>(grade)</a>
+<a class="sourceLine" id="cb5-3" title="3">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took <span class="kw">JOIN</span> Offering <span class="kw">ON</span> Took.<span class="kw">oid</span> <span class="op">=</span> Offering.<span class="kw">oid</span></a>
+<a class="sourceLine" id="cb5-4" title="4">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> sid, term</a>
+<a class="sourceLine" id="cb5-5" title="5">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">HAVING</span> <span class="fu">avg</span>(grade) <span class="op">&gt;</span> <span class="dv">80</span>;</a>
+<a class="sourceLine" id="cb5-6" title="6"><span class="kw">CREATE</span> <span class="kw">VIEW</span></a></code></pre></div>
+<p>does not figure out anyone’s average; it just tells SQL “When I say DeansHonoursStudents, I mean that code up there”. If we want SQL to do the computation, we just have to use the view in some other query. It could be as simple a query as this:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb6-1" title="1">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> DeansHonoursStudents;</a>
+<a class="sourceLine" id="cb6-2" title="2">  sid  | term  |         <span class="fu">avg</span>         </a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="co">-------+-------+---------------------</span></a>
+<a class="sourceLine" id="cb6-4" title="4"> <span class="dv">98000</span> | <span class="dv">20081</span> | <span class="fl">85.0000000000000000</span></a>
+<a class="sourceLine" id="cb6-5" title="5"> <span class="dv">98000</span> | <span class="dv">20089</span> | <span class="fl">83.8000000000000000</span></a>
+<a class="sourceLine" id="cb6-6" title="6"> <span class="dv">99999</span> | <span class="dv">20089</span> | <span class="fl">88.5555555555555556</span></a>
+<a class="sourceLine" id="cb6-7" title="7">(<span class="dv">3</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>or it could be a more complex query that, say, joins this view with some existing tables or other views.</p>
+<p>Notice what happens now if we change a student’s grades.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb7-1" title="1">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span>  <span class="kw">INSERT</span> <span class="kw">INTO</span> Took <span class="kw">values</span> (<span class="dv">98000</span>, <span class="dv">33</span>, <span class="dv">100</span>);</a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="kw">INSERT</span> <span class="dv">0</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb7-3" title="3">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> DeansHonoursStudents;</a>
+<a class="sourceLine" id="cb7-4" title="4">  sid  | term  |         <span class="fu">avg</span>         </a>
+<a class="sourceLine" id="cb7-5" title="5"><span class="co">-------+-------+---------------------</span></a>
+<a class="sourceLine" id="cb7-6" title="6"> <span class="dv">98000</span> | <span class="dv">20081</span> | <span class="fl">87.1428571428571429</span></a>
+<a class="sourceLine" id="cb7-7" title="7"> <span class="dv">98000</span> | <span class="dv">20089</span> | <span class="fl">83.8000000000000000</span></a>
+<a class="sourceLine" id="cb7-8" title="8"> <span class="dv">99999</span> | <span class="dv">20089</span> | <span class="fl">88.5555555555555556</span></a>
+<a class="sourceLine" id="cb7-9" title="9">(<span class="dv">3</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>Student 98000’s average in term 20081, as reported here, has gone up. This is because our query uses the DeansHonoursStudents view, which is recomputed every time it is used.</p>
+<p>This kind of view is called a “virtual” view because, other than its definition, it is not stored. (My dictionary says that a virtual thing doesn’t physically exist but is made to appear as if it exists.)</p>
+<h2 id="pros-and-cons">Pros and cons</h2>
+<p>Views are always update because they are recomputed every time they are used. But of course this comes at the cost of all the recomputation. Derived tables don’t have that cost, but (a) they don’t stay up-to-date with respect to the base tables they were derived from, and (b) they require storage space for their contents, which may be very large.</p>
+<h2 id="uses-for-views">Uses for views</h2>
+<p>Views can be used to break down a large query, as we did with assignment statements in relational algebra.</p>
+<p>Views can also be used to provide another way of looking at the same data, which is why they are called “views.” For example, imagine that the university has staff who review a student’s transcript to determine if they have completed all the requirements of their program. For this, they might need information pulled from multiple tables, but only some of the columns and rows. They wouldn’t need to see failing grades, for instance, since they don’t contribute to program completion, and they wouldn’t need to see what professor taught each course because that is not relevant. A view could assemble the necessary information and present it as if that’s exactly what’s in the database. We can also grant users privileges to access the view but not the base tables it came from.</p>
+<h2 id="the-other-kind-of-view-a-materialized-view">The other kind of view: a materialized view</h2>
+<p>A “materialized” view is actually computed and stored at the time it is defined, and in addition, the relationship between it and its base tables is maintained at all times. Like a derived table, it doesn’t have to be recomputed (unless something changes in the base tables), and like a virtual view, it is always up to date. But it is tremendously expensive to maintain the relationship between a materialized view and its base tables: every change to one of them could potentially require an update to the materialized view. Because of this, many DBMSs do not support materialized views.</p>
+</section>
+</body>
+</html>

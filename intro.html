@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Diane Horton" />
+  <title>1 Introduction to SQL</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.line-block{white-space: pre-line;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #a0a0a0;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #a0a0a0;  padding-left: 4px; }
+div.sourceCode
+  { color: #1f1c1b; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span. { color: #1f1c1b; } /* Normal */
+code span.al { color: #bf0303; background-color: #f7e6e6; font-weight: bold; } /* Alert */
+code span.an { color: #ca60ca; } /* Annotation */
+code span.at { color: #0057ae; } /* Attribute */
+code span.bn { color: #b08000; } /* BaseN */
+code span.bu { color: #644a9b; font-weight: bold; } /* BuiltIn */
+code span.cf { color: #1f1c1b; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #924c9d; } /* Char */
+code span.cn { color: #aa5500; } /* Constant */
+code span.co { color: #898887; } /* Comment */
+code span.cv { color: #0095ff; } /* CommentVar */
+code span.do { color: #607880; } /* Documentation */
+code span.dt { color: #0057ae; } /* DataType */
+code span.dv { color: #b08000; } /* DecVal */
+code span.er { color: #bf0303; text-decoration: underline; } /* Error */
+code span.ex { color: #0095ff; font-weight: bold; } /* Extension */
+code span.fl { color: #b08000; } /* Float */
+code span.fu { color: #644a9b; } /* Function */
+code span.im { color: #ff5500; } /* Import */
+code span.in { color: #b08000; } /* Information */
+code span.kw { color: #1f1c1b; font-weight: bold; } /* Keyword */
+code span.op { color: #1f1c1b; } /* Operator */
+code span.ot { color: #006e28; } /* Other */
+code span.pp { color: #006e28; } /* Preprocessor */
+code span.re { color: #0057ae; background-color: #e0e9f8; } /* RegionMarker */
+code span.sc { color: #3daee9; } /* SpecialChar */
+code span.ss { color: #ff5500; } /* SpecialString */
+code span.st { color: #bf0303; } /* String */
+code span.va { color: #0057ae; } /* Variable */
+code span.vs { color: #bf0303; } /* VerbatimString */
+code span.wa { color: #bf0303; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://www.teach.cs.toronto.edu/~csc343h/fall/tufte.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">1 Introduction to SQL</h1>
+<p class="author">Diane Horton</p>
+</header>
+<section class="level1">
+<p>So far, we have defined database schemas and queries mathematically. We are very well prepared to learn SQL a programming language that allows us to execute our queries in a DBMS.</p>
+<p>SQL is short for “Structured Query Language”, but it is for more than just writing queries. It has two sub-parts:</p>
+<ul>
+<li>DDL (or “Data Definition Language”), used for defining schemas</li>
+<li>DML (or “Data Manipulation Language”), used for writing queries as well as for modifying the datase.</li>
+</ul>
+<h2 id="postgresql">PostgreSQL</h2>
+<p>We’ll be using an open-source DBMS called PostgreSQL. You’ll find documentation for postgreSQL at the <a href="https://www.postgresql.org/">postgreSQL home page</a> including information on how to download it for your own platform, should you choose to.</p>
+<p>These specific pages are highly relevant: - [PostgreSQL Documentation] (http://www.postgresql.org/docs/9.1/static/index.html), particularly [Part II: The SQL Language] (https://www.postgresql.org/docs/9.1/static/sql.html), which explains the syntax and semantics of SQL. This documentation is concise and easy to read, so you’ll want to reference it often. - <a href="http://www.postgresqltutorial.com/">PostgreSQL Tutorial</a></p>
+<h2 id="what-about-other-dbmss">What about other DBMSs?</h2>
+<p>Learning PostgreSQL will prepare you well for using other DMBSs, such as MySQL and Oracle. Unfortunately, there are differences in the SQL language across DBMSs. There is an official SQL standard that fully specifies the language, and is updated periodically. However, DBMSs typically don’t implement every feature in the standard, and often add their own features as well. This means that you may find differences around the edges of the language when you work with a new DBMS. It also creates issues for portability of code.</p>
+<h2 id="basic-select-from-where-queries">Basic SELECT-FROM-WHERE queries</h2>
+<p>Before we begin, here is the university schema we have been working with (the key of each relation is in bold):</p>
+<ul>
+<li>Student(<strong>sID</strong>, surName, firstName, campus, email, cgpa)</li>
+<li>Course(<strong>dept, cnum</strong>, name, breadth)</li>
+<li>Offering(<strong>oID</strong>, dept, cNum, term, instructor)</li>
+<li>Took(<strong>sID, oID</strong>, grade)</li>
+<li><em>and the foreign key relationships that you will recall</em></li>
+</ul>
+<p>We’ll learn later how to express this in SQL using the Data Definition Language. But first, let’s start writing some queries!</p>
+<p>The simplest kind of query is a select-from-where. Here is an example:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb1-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> name             <span class="co">-- choose the column called &quot;name&quot;</span></a>
+<a class="sourceLine" id="cb1-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Course             <span class="co">-- from the Course table</span></a>
+<a class="sourceLine" id="cb1-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> dept <span class="op">=</span> <span class="st">&#39;CSC&#39;</span>;     <span class="co">-- choose only rows that satisfy</span></a>
+<a class="sourceLine" id="cb1-4" title="4">               name            </a>
+<a class="sourceLine" id="cb1-5" title="5">    <span class="co">---------------------------</span></a>
+<a class="sourceLine" id="cb1-6" title="6">     Intro <span class="kw">to</span> Databases</a>
+<a class="sourceLine" id="cb1-7" title="7">     Software Design</a>
+<a class="sourceLine" id="cb1-8" title="8">     Intro <span class="kw">to</span> Comp Sci</a>
+<a class="sourceLine" id="cb1-9" title="9">     <span class="kw">Data</span> Struct &amp; Anal</a>
+<a class="sourceLine" id="cb1-10" title="10">     Intro <span class="kw">to</span> Visual Computing</a>
+<a class="sourceLine" id="cb1-11" title="11">     COBOL programming</a>
+<a class="sourceLine" id="cb1-12" title="12">    (<span class="dv">6</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p><code>WHERE</code> is equivalent to σ in relational algebra. Sadly, the designers of SQL chose the keyword <code>SELECT</code> for the relational algrebra Π but you will get used to that very quickly.</p>
+<p>Below are a few additional things we can do with a select-from-where, to get us started.</p>
+<h2 id="cartesian-product">Cartesian product</h2>
+<p>We can get the Cartesian product of two or more tables by puttting them in a comma-separated list in the FROM clause:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb2-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> name, sid, grade</a>
+<a class="sourceLine" id="cb2-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Course, Offering, Took</a>
+<a class="sourceLine" id="cb2-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> Course.dept <span class="op">=</span> <span class="st">&#39;CSC&#39;</span>;</a>
+<a class="sourceLine" id="cb2-4" title="4">               name            |  sid  | grade </a>
+<a class="sourceLine" id="cb2-5" title="5">    <span class="co">---------------------------+-------+-------</span></a>
+<a class="sourceLine" id="cb2-6" title="6">     Intro <span class="kw">to</span> Databases        | <span class="dv">99132</span> |    <span class="dv">79</span></a>
+<a class="sourceLine" id="cb2-7" title="7">     Intro <span class="kw">to</span> Databases        | <span class="dv">99132</span> |    <span class="dv">79</span></a>
+<a class="sourceLine" id="cb2-8" title="8">     Intro <span class="kw">to</span> Databases        | <span class="dv">99132</span> |    <span class="dv">79</span></a>
+<a class="sourceLine" id="cb2-9" title="9">     Intro <span class="kw">to</span> Databases        | <span class="dv">99132</span> |    <span class="dv">79</span></a>
+<a class="sourceLine" id="cb2-10" title="10">     <span class="op">..</span>. etc.</a></code></pre></div>
+<p>Of course, this will create many nonsensical combinations. We will soon learn all about how to express natural joins and other kinds of join in SQL. In the meanwhile, we can use <code>WHERE</code> to filter out those nonsensical combinations:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb3-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> name, sid, grade</a>
+<a class="sourceLine" id="cb3-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Course, Offering, Took</a>
+<a class="sourceLine" id="cb3-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> Course.dept <span class="op">=</span> Offering.dept <span class="kw">and</span>   <span class="co">-- New!</span></a>
+<a class="sourceLine" id="cb3-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span>    Course.cnum <span class="op">=</span> Offering.cnum <span class="kw">and</span>      <span class="co">-- New!</span></a>
+<a class="sourceLine" id="cb3-5" title="5">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span>    Offering.<span class="kw">oid</span> <span class="op">=</span> Took.<span class="kw">oid</span> <span class="kw">and</span>          <span class="co">-- New!          </span></a>
+<a class="sourceLine" id="cb3-6" title="6">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span>    Course.dept <span class="op">=</span> <span class="st">&#39;CSC&#39;</span>;</a>
+<a class="sourceLine" id="cb3-7" title="7">            name        |  sid  | grade </a>
+<a class="sourceLine" id="cb3-8" title="8">    <span class="co">--------------------+-------+-------</span></a>
+<a class="sourceLine" id="cb3-9" title="9">     Intro <span class="kw">to</span> Databases | <span class="dv">99132</span> |    <span class="dv">79</span></a>
+<a class="sourceLine" id="cb3-10" title="10">     Intro <span class="kw">to</span> Databases | <span class="dv">98000</span> |    <span class="dv">82</span></a>
+<a class="sourceLine" id="cb3-11" title="11">     Software Design    | <span class="dv">98000</span> |    <span class="dv">89</span></a>
+<a class="sourceLine" id="cb3-12" title="12">     Software Design    | <span class="dv">98000</span> |    <span class="dv">72</span></a>
+<a class="sourceLine" id="cb3-13" title="13">     <span class="op">..</span>. etc.</a></code></pre></div>
+<h2 id="compound-conditions-in-a-where-clause">Compound conditions in a WHERE clause</h2>
+<p>We just saw our first compound condition. We can build boolean expressions using:</p>
+<ul>
+<li>logical operators: <code>=, &lt;, &gt;, &lt;=, &gt;=, !=</code> and <code>&lt;&gt;</code>. The operators <code>!=</code> and <code>&lt;&gt;</code> mean “not equals” in SQL.</li>
+<li>boolean operators: <code>AND</code>, <code>OR</code>, and <code>NOT</code></li>
+<li>and many other boolean functions and operators. See <a href="https://www.postgresql.org/docs/9.1/static/functions.html">chapter 9</a> of the PostgreSQL documentation.</li>
+</ul>
+<h2 id="temporarily-renaming-a-table">Temporarily renaming a table</h2>
+<p>Similar to ρ in relational algebra, in SQL we can rename a table for the duration of a query. Here we rename <code>Employee</code> to <code>e</code> and <code>Deparment</code> to <code>d</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb4-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> e.name, d.name</a>
+<a class="sourceLine" id="cb4-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Employee e, Department d</a>
+<a class="sourceLine" id="cb4-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> d.name <span class="op">=</span> <span class="st">&#39;marketing&#39;</span> <span class="kw">and</span> e.name <span class="op">=</span> <span class="st">&#39;Horton&#39;</span>;</a></code></pre></div>
+<p>In this case, it makes the query a bit more concise than it would have been:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb5-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> Employee.name, Department.name</a>
+<a class="sourceLine" id="cb5-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Employee, Department</a>
+<a class="sourceLine" id="cb5-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> Department.name <span class="op">=</span> <span class="st">&#39;marketing&#39;</span> <span class="kw">and</span> Employee.name <span class="op">=</span> <span class="st">&#39;Horton&#39;</span>;</a></code></pre></div>
+<p>but we also know that renaming can be convenient for other reasons, such as distinguishing two occurences of a table in a self-join:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb6-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> e1.name, e2.name</a>
+<a class="sourceLine" id="cb6-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Employee e1, Employee e2</a>
+<a class="sourceLine" id="cb6-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">where</span> e1.salary <span class="op">&lt;</span> e2.salary;</a></code></pre></div>
+<h2 id="wildcard-in-the-select-clause">Wildcard in the SELECT clause</h2>
+<p>If we want every column to be included in the result, rather than listing them all, we can use a wildcard:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb7-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span></a>
+<a class="sourceLine" id="cb7-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Course</a>
+<a class="sourceLine" id="cb7-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> dept <span class="op">=</span> <span class="st">&#39;CSC&#39;</span>;</a>
+<a class="sourceLine" id="cb7-4" title="4">     cnum |           name            | dept | breadth </a>
+<a class="sourceLine" id="cb7-5" title="5">    <span class="co">------+---------------------------+------+---------</span></a>
+<a class="sourceLine" id="cb7-6" title="6">      <span class="dv">343</span> | Intro <span class="kw">to</span> Databases        | CSC  | f</a>
+<a class="sourceLine" id="cb7-7" title="7">      <span class="dv">207</span> | Software Design           | CSC  | f</a>
+<a class="sourceLine" id="cb7-8" title="8">      <span class="dv">148</span> | Intro <span class="kw">to</span> Comp Sci         | CSC  | f</a>
+<a class="sourceLine" id="cb7-9" title="9">      <span class="dv">263</span> | <span class="kw">Data</span> Struct &amp; Anal        | CSC  | f</a>
+<a class="sourceLine" id="cb7-10" title="10">      <span class="dv">320</span> | Intro <span class="kw">to</span> Visual Computing | CSC  | f</a>
+<a class="sourceLine" id="cb7-11" title="11">      <span class="dv">222</span> | COBOL programming         | CSC  | f</a>
+<a class="sourceLine" id="cb7-12" title="12">    (<span class="dv">6</span> <span class="kw">rows</span>)</a></code></pre></div>
+<h2 id="naming-columns">Naming columns</h2>
+<p>We can add an AS-expression to choose a column name in the result of a query.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb8-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> name <span class="kw">AS</span> title, dept</a>
+<a class="sourceLine" id="cb8-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Course</a>
+<a class="sourceLine" id="cb8-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> breadth;</a>
+<a class="sourceLine" id="cb8-4" title="4">           title       | dept </a>
+<a class="sourceLine" id="cb8-5" title="5">    <span class="co">-------------------+------</span></a>
+<a class="sourceLine" id="cb8-6" title="6">     Intro Archaeology | ANT</a>
+<a class="sourceLine" id="cb8-7" title="7">     Narrative         | ENG</a>
+<a class="sourceLine" id="cb8-8" title="8">     Rhetoric          | ENG</a>
+<a class="sourceLine" id="cb8-9" title="9">     <span class="kw">The</span> Graphic Novel | ENG</a>
+<a class="sourceLine" id="cb8-10" title="10">     Mediaeval Society | HIS</a>
+<a class="sourceLine" id="cb8-11" title="11">     Black Freedom     | HIS</a>
+<a class="sourceLine" id="cb8-12" title="12">    (<span class="dv">6</span> <span class="kw">rows</span>)</a></code></pre></div>
+<h2 id="sorting">Sorting</h2>
+<p>In relational algebra, a relation is a set and so order doesn’t matter. But in the real world, order often does matter. We can sort the results of a query by adding an <code>ORDER BY</code> clause to the end of a select-from-where query:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb9-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, grade</a>
+<a class="sourceLine" id="cb9-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb9-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> grade <span class="op">&gt;</span> <span class="dv">90</span></a>
+<a class="sourceLine" id="cb9-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> grade;</a>
+<a class="sourceLine" id="cb9-5" title="5">      sid  | grade </a>
+<a class="sourceLine" id="cb9-6" title="6">    <span class="co">-------+-------</span></a>
+<a class="sourceLine" id="cb9-7" title="7">       <span class="dv">157</span> |    <span class="dv">91</span></a>
+<a class="sourceLine" id="cb9-8" title="8">     <span class="dv">99999</span> |    <span class="dv">91</span></a>
+<a class="sourceLine" id="cb9-9" title="9">     <span class="dv">98000</span> |    <span class="dv">92</span></a>
+<a class="sourceLine" id="cb9-10" title="10">     <span class="dv">98000</span> |    <span class="dv">93</span></a>
+<a class="sourceLine" id="cb9-11" title="11">     <span class="dv">99999</span> |    <span class="dv">94</span></a>
+<a class="sourceLine" id="cb9-12" title="12">     <span class="dv">99999</span> |    <span class="dv">96</span></a>
+<a class="sourceLine" id="cb9-13" title="13">     <span class="dv">98000</span> |    <span class="dv">97</span></a>
+<a class="sourceLine" id="cb9-14" title="14">       <span class="dv">157</span> |    <span class="dv">98</span></a>
+<a class="sourceLine" id="cb9-15" title="15">     <span class="dv">98000</span> |    <span class="dv">98</span></a>
+<a class="sourceLine" id="cb9-16" title="16">     <span class="dv">99132</span> |    <span class="dv">98</span></a>
+<a class="sourceLine" id="cb9-17" title="17">     <span class="dv">99132</span> |    <span class="dv">99</span></a>
+<a class="sourceLine" id="cb9-18" title="18">     <span class="dv">99999</span> |    <span class="dv">99</span></a>
+<a class="sourceLine" id="cb9-19" title="19">     <span class="dv">99999</span> |    <span class="dv">99</span></a>
+<a class="sourceLine" id="cb9-20" title="20">       <span class="dv">157</span> |    <span class="dv">99</span></a>
+<a class="sourceLine" id="cb9-21" title="21">     <span class="dv">99999</span> |   <span class="dv">100</span></a>
+<a class="sourceLine" id="cb9-22" title="22">    (<span class="dv">15</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>The default is to use ascending order, but we can override this by saying <code>DESC</code> (not <code>DESCENDING</code>):</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb10-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, grade</a>
+<a class="sourceLine" id="cb10-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb10-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> grade <span class="op">&gt;</span> <span class="dv">90</span></a>
+<a class="sourceLine" id="cb10-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> grade <span class="kw">DESC</span>;</a>
+<a class="sourceLine" id="cb10-5" title="5">      sid  | grade </a>
+<a class="sourceLine" id="cb10-6" title="6">    <span class="co">-------+-------</span></a>
+<a class="sourceLine" id="cb10-7" title="7">     <span class="dv">99999</span> |   <span class="dv">100</span></a>
+<a class="sourceLine" id="cb10-8" title="8">       <span class="dv">157</span> |    <span class="dv">99</span></a>
+<a class="sourceLine" id="cb10-9" title="9">     <span class="dv">99999</span> |    <span class="dv">99</span></a>
+<a class="sourceLine" id="cb10-10" title="10">     <span class="dv">99132</span> |    <span class="dv">99</span></a>
+<a class="sourceLine" id="cb10-11" title="11">     <span class="dv">99999</span> |    <span class="dv">99</span></a>
+<a class="sourceLine" id="cb10-12" title="12">       <span class="dv">157</span> |    <span class="dv">98</span></a>
+<a class="sourceLine" id="cb10-13" title="13">     <span class="dv">98000</span> |    <span class="dv">98</span></a>
+<a class="sourceLine" id="cb10-14" title="14">     <span class="dv">99132</span> |    <span class="dv">98</span></a>
+<a class="sourceLine" id="cb10-15" title="15">     <span class="dv">98000</span> |    <span class="dv">97</span></a>
+<a class="sourceLine" id="cb10-16" title="16">     <span class="dv">99999</span> |    <span class="dv">96</span></a>
+<a class="sourceLine" id="cb10-17" title="17">     <span class="dv">99999</span> |    <span class="dv">94</span></a>
+<a class="sourceLine" id="cb10-18" title="18">     <span class="dv">98000</span> |    <span class="dv">93</span></a>
+<a class="sourceLine" id="cb10-19" title="19">     <span class="dv">98000</span> |    <span class="dv">92</span></a>
+<a class="sourceLine" id="cb10-20" title="20">       <span class="dv">157</span> |    <span class="dv">91</span></a>
+<a class="sourceLine" id="cb10-21" title="21">     <span class="dv">99999</span> |    <span class="dv">91</span></a>
+<a class="sourceLine" id="cb10-22" title="22">    (<span class="dv">15</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>We can order according to multiple columns. Here, we see courses in order by <code>dept</code>, and where there are multiple rows with the same value for <code>dept</code>, they are further ordered by course <code>name</code>.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb11-1" title="1">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span></a>
+<a class="sourceLine" id="cb11-2" title="2">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Course</a>
+<a class="sourceLine" id="cb11-3" title="3">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> dept, name;</a>
+<a class="sourceLine" id="cb11-4" title="4"> cnum |           name            | dept | breadth </a>
+<a class="sourceLine" id="cb11-5" title="5"><span class="co">------+---------------------------+------+---------</span></a>
+<a class="sourceLine" id="cb11-6" title="6">  <span class="dv">203</span> | Human Biol &amp; Evol         | ANT  | f</a>
+<a class="sourceLine" id="cb11-7" title="7">  <span class="dv">200</span> | Intro Archaeology         | ANT  | t</a>
+<a class="sourceLine" id="cb11-8" title="8">  <span class="dv">222</span> | COBOL programming         | CSC  | f</a>
+<a class="sourceLine" id="cb11-9" title="9">  <span class="dv">263</span> | <span class="kw">Data</span> Struct &amp; Anal        | CSC  | f</a>
+<a class="sourceLine" id="cb11-10" title="10">  <span class="dv">148</span> | Intro <span class="kw">to</span> Comp Sci         | CSC  | f</a>
+<a class="sourceLine" id="cb11-11" title="11">  <span class="dv">343</span> | Intro <span class="kw">to</span> Databases        | CSC  | f</a>
+<a class="sourceLine" id="cb11-12" title="12">  <span class="dv">320</span> | Intro <span class="kw">to</span> Visual Computing | CSC  | f</a>
+<a class="sourceLine" id="cb11-13" title="13">  <span class="dv">207</span> | Software Design           | CSC  | f</a>
+<a class="sourceLine" id="cb11-14" title="14">  <span class="dv">263</span> | Compar Vert Anatomy       | EEB  | f</a>
+<a class="sourceLine" id="cb11-15" title="15">  <span class="dv">216</span> | Marine Mammal Bio         | EEB  | f</a>
+<a class="sourceLine" id="cb11-16" title="16">  <span class="dv">150</span> | Organisms <span class="kw">in</span> Environ      | EEB  | f</a>
+<a class="sourceLine" id="cb11-17" title="17">  <span class="dv">110</span> | Narrative                 | ENG  | t</a>
+<a class="sourceLine" id="cb11-18" title="18">  <span class="dv">205</span> | Rhetoric                  | ENG  | t</a>
+<a class="sourceLine" id="cb11-19" title="19">  <span class="dv">235</span> | <span class="kw">The</span> Graphic Novel         | ENG  | t</a>
+<a class="sourceLine" id="cb11-20" title="20">  <span class="dv">200</span> | Environmental <span class="kw">Change</span>      | ENV  | f</a>
+<a class="sourceLine" id="cb11-21" title="21">  <span class="dv">320</span> | Natl &amp; Intl Env Policy    | ENV  | f</a>
+<a class="sourceLine" id="cb11-22" title="22">  <span class="dv">296</span> | Black Freedom             | HIS  | t</a>
+<a class="sourceLine" id="cb11-23" title="23">  <span class="dv">220</span> | Mediaeval Society         | HIS  | t</a>
+<a class="sourceLine" id="cb11-24" title="24">(<span class="dv">18</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>We can also use the value of an expression to determing ordering. For example, if we had a table including columns called <code>sales</code> and <code>rentals</code>, we could write <code>ORDER BY sales + rentals</code>.</p>
+<h2 id="expressions-in-a-select-clause">Expressions in a SELECT clause</h2>
+<p>Instead of a simple attribute name, you can use an expression in a SELECT clause. Here are two simple examples:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb12-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, grade <span class="op">+</span> <span class="dv">10</span> <span class="kw">AS</span> adjusted</a>
+<a class="sourceLine" id="cb12-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took;</a>
+<a class="sourceLine" id="cb12-3" title="3">      sid  | adjusted </a>
+<a class="sourceLine" id="cb12-4" title="4">    <span class="co">-------+----------</span></a>
+<a class="sourceLine" id="cb12-5" title="5">     <span class="dv">99132</span> |       <span class="dv">89</span></a>
+<a class="sourceLine" id="cb12-6" title="6">     <span class="dv">99132</span> |      <span class="dv">108</span></a>
+<a class="sourceLine" id="cb12-7" title="7">     <span class="dv">99132</span> |       <span class="dv">92</span></a>
+<a class="sourceLine" id="cb12-8" title="8">     <span class="dv">99132</span> |      <span class="dv">109</span></a>
+<a class="sourceLine" id="cb12-9" title="9">     <span class="op">..</span>. etc.</a>
+<a class="sourceLine" id="cb12-10" title="10"></a>
+<a class="sourceLine" id="cb12-11" title="11">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> dept <span class="op">||</span> cnum</a>
+<a class="sourceLine" id="cb12-12" title="12">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Course</a>
+<a class="sourceLine" id="cb12-13" title="13">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> cnum <span class="op">&lt;</span> <span class="dv">200</span>;</a>
+<a class="sourceLine" id="cb12-14" title="14">     ?<span class="kw">column</span>? </a>
+<a class="sourceLine" id="cb12-15" title="15">    <span class="co">----------</span></a>
+<a class="sourceLine" id="cb12-16" title="16">     CSC148</a>
+<a class="sourceLine" id="cb12-17" title="17">     EEB150</a>
+<a class="sourceLine" id="cb12-18" title="18">     ENG110</a>
+<a class="sourceLine" id="cb12-19" title="19">     CSC100</a>
+<a class="sourceLine" id="cb12-20" title="20">    (<span class="dv">4</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>In the second query, <code>||</code> is string concatenation. (See the <a href="https://www.postgresql.org/docs/9.2/static/functions.html">PostgreSQL documentation</a> for details on the <em>many</em> built-in functions and operators.) Notice that we did not provide a name for the column in the result. In such cases, SQL names it `?column?’. It’s essentially saying “I have no idea what to call this!”</p>
+<h2 id="expressions-that-are-a-constant">Expressions that are a constant</h2>
+<p>Rather than pull values from a table, a SELECT clause can use a constant value in a column. Here is an example:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb13-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> name, <span class="st">&#39;satisfies&#39;</span> <span class="kw">as</span> breadthRequirement</a>
+<a class="sourceLine" id="cb13-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Course</a>
+<a class="sourceLine" id="cb13-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> breadth;</a>
+<a class="sourceLine" id="cb13-4" title="4">           name        | breadthrequirement </a>
+<a class="sourceLine" id="cb13-5" title="5">    <span class="co">-------------------+--------------------</span></a>
+<a class="sourceLine" id="cb13-6" title="6">     Intro Archaeology | satisfies</a>
+<a class="sourceLine" id="cb13-7" title="7">     Narrative         | satisfies</a>
+<a class="sourceLine" id="cb13-8" title="8">     Rhetoric          | satisfies</a>
+<a class="sourceLine" id="cb13-9" title="9">     <span class="kw">The</span> Graphic Novel | satisfies</a>
+<a class="sourceLine" id="cb13-10" title="10">     Mediaeval Society | satisfies</a>
+<a class="sourceLine" id="cb13-11" title="11">     Black Freedom     | satisfies</a>
+<a class="sourceLine" id="cb13-12" title="12">    (<span class="dv">6</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>We have extracted only courses for which the value of <code>breadth</code> is true (which means, in our schema, that the course satisfies the “breadth requirement” of a university degree). And we chose to show this in the result by having the value <code>satisfies</code> throughout the second column, which we named <code>breadthrequirement</code>.</p>
+<h2 id="pattern-matching">Pattern matching</h2>
+<p>SQL provides the <code>LIKE</code> operator for comparing a string to a pattern. The pattern is a quoted string and can include these special characters:</p>
+<ul>
+<li><code>_</code> matches any single character</li>
+<li><code>%</code> matches any sequence of zero or more characters</li>
+</ul>
+<p>Here are two simple examples:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb14-1" title="1">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span></a>
+<a class="sourceLine" id="cb14-2" title="2">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Course</a>
+<a class="sourceLine" id="cb14-3" title="3">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> name <span class="kw">LIKE</span> <span class="st">&#39;%to%&#39;</span>;</a>
+<a class="sourceLine" id="cb14-4" title="4"> cnum |           name            | dept | breadth </a>
+<a class="sourceLine" id="cb14-5" title="5"><span class="co">------+---------------------------+------+---------</span></a>
+<a class="sourceLine" id="cb14-6" title="6">  <span class="dv">343</span> | Intro <span class="kw">to</span> Databases        | CSC  | f</a>
+<a class="sourceLine" id="cb14-7" title="7">  <span class="dv">148</span> | Intro <span class="kw">to</span> Comp Sci         | CSC  | f</a>
+<a class="sourceLine" id="cb14-8" title="8">  <span class="dv">320</span> | Intro <span class="kw">to</span> Visual Computing | CSC  | f</a>
+<a class="sourceLine" id="cb14-9" title="9">  <span class="dv">263</span> | Compar Vert Anatomy       | EEB  | f</a>
+<a class="sourceLine" id="cb14-10" title="10">  <span class="dv">205</span> | Rhetoric                  | ENG  | t</a>
+<a class="sourceLine" id="cb14-11" title="11">(<span class="dv">5</span> <span class="kw">rows</span>)</a>
+<a class="sourceLine" id="cb14-12" title="12"></a>
+<a class="sourceLine" id="cb14-13" title="13"></a>
+<a class="sourceLine" id="cb14-14" title="14">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="co">-- Notice that UTSC students are excluded.  The string &#39;UTSC&#39; </span></a>
+<a class="sourceLine" id="cb14-15" title="15">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="co">-- does not match the pattern &#39;UT_&#39; because the underscore only</span></a>
+<a class="sourceLine" id="cb14-16" title="16">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="co">-- matches a single character, and the pattern is required to </span></a>
+<a class="sourceLine" id="cb14-17" title="17">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="co">-- cover the entire string.</span></a>
+<a class="sourceLine" id="cb14-18" title="18">csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span></a>
+<a class="sourceLine" id="cb14-19" title="19">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Student</a>
+<a class="sourceLine" id="cb14-20" title="20">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> campus <span class="kw">LIKE</span> <span class="st">&#39;UT_&#39;</span>;</a>
+<a class="sourceLine" id="cb14-21" title="21"> sid | firstname |  surname  | campus |  email  | cgpa </a>
+<a class="sourceLine" id="cb14-22" title="22"><span class="co">-----+-----------+-----------+--------+---------+------</span></a>
+<a class="sourceLine" id="cb14-23" title="23"> <span class="dv">157</span> | Leilani   | Lakemeyer | UTM    | lani@cs | <span class="fl">3.42</span></a>
+<a class="sourceLine" id="cb14-24" title="24">(<span class="dv">1</span> <span class="kw">row</span>)</a></code></pre></div>
+<p><code>LIKE</code> offers an extremely limited form of pattern matching but has the advantage of being fast. SQL also supports regular expressions for string matching, using the <code>~</code> operator. For example:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb15-1" title="1">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="co">-- Find students whose surname begins with M or F or L, followed</span></a>
+<a class="sourceLine" id="cb15-2" title="2">csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="co">-- by &#39;a&#39;, and then zero or more additional characters.</span></a>
+<a class="sourceLine" id="cb15-3" title="3">csc343h<span class="op">-</span>dianeh<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span></a>
+<a class="sourceLine" id="cb15-4" title="4"><span class="kw">FROM</span> Student</a>
+<a class="sourceLine" id="cb15-5" title="5"><span class="kw">WHERE</span> surname ~ <span class="st">&#39;(M|F|L)a*&#39;</span>;</a>
+<a class="sourceLine" id="cb15-6" title="6">  sid  | firstname |  surname   | campus |  email   | cgpa </a>
+<a class="sourceLine" id="cb15-7" title="7"><span class="co">-------+-----------+------------+--------+----------+------</span></a>
+<a class="sourceLine" id="cb15-8" title="8"> <span class="dv">99132</span> | Avery     | Marchmount | StG    | avery@cs | <span class="fl">3.13</span></a>
+<a class="sourceLine" id="cb15-9" title="9"> <span class="dv">98000</span> | William   | Fairgrieve | StG    | will@cs  | <span class="fl">4.00</span></a>
+<a class="sourceLine" id="cb15-10" title="10">   <span class="dv">157</span> | Leilani   | Lakemeyer  | UTM    | lani@cs  | <span class="fl">3.42</span></a>
+<a class="sourceLine" id="cb15-11" title="11">(<span class="dv">3</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>For full details, see the <a href="https://www.postgresql.org/docs/9.3/functions-matching.html">postgreSQL documentation</a> Note this warning contained in that documentation: “Regular expressions can be contrived that take arbitrary amounts of time and memory to process. Be wary of accepting regular-expression search patterns from hostile sources.”</p>
+<h2 id="case-sensitivity-and-whitespace">Case-sensitivity and whitespace</h2>
+<p>Let’s address the lexical level of SQL syntax: how its smallest elements (keywords, operators, and so on) are recognized.</p>
+<p>Keywords in SQL are not case-sensitive. Neither are identifiers (names of tables or columns). In addition, line breaks and tabs are ignored by SQL. So, for example, all of these queries are syntactically valid and do the same thing:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb16-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="co">-- This looks nice.</span></a>
+<a class="sourceLine" id="cb16-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid</a>
+<a class="sourceLine" id="cb16-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> took</a>
+<a class="sourceLine" id="cb16-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">WHERE</span> grade <span class="op">&gt;</span> <span class="dv">50</span>;</a>
+<a class="sourceLine" id="cb16-5" title="5"></a>
+<a class="sourceLine" id="cb16-6" title="6">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="co">-- This is fine if we just want the answer and aren&#39;t saving the query.</span></a>
+<a class="sourceLine" id="cb16-7" title="7">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">select</span> sid <span class="kw">from</span> took <span class="kw">where</span> grade <span class="op">&gt;</span> <span class="dv">50</span>;</a>
+<a class="sourceLine" id="cb16-8" title="8"></a>
+<a class="sourceLine" id="cb16-9" title="9">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="co">-- This is just ugly.</span></a>
+<a class="sourceLine" id="cb16-10" title="10">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> SID <span class="kw">FROM</span></a>
+<a class="sourceLine" id="cb16-11" title="11">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span>     TOOK <span class="kw">WHERE</span> GRADE</a>
+<a class="sourceLine" id="cb16-12" title="12">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span>     <span class="op">&gt;</span> <span class="dv">50</span></a>
+<a class="sourceLine" id="cb16-13" title="13">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span>     ;</a></code></pre></div>
+<p>There is no standard convention, but a reasonable one (used in the first query above) is this:</p>
+<ul>
+<li>Put each clause on a line.</li>
+<li>Use all capitals for keywords.</li>
+<li>Use a leading capital for table names.</li>
+<li>Use lowercase for column names.</li>
+</ul>
+<p>Typing keywords in all capitals is a little awkward, and you may feel that the queries are shouting at you. It is acceptable in this course to not capitalize keywords. Whatever you do, do it consistently.</p>
+<h2 id="sql-is-a-high-level-language">SQL is a high-level language</h2>
+<p>We say that SQL is a high-level language. An SQL query says what we want from the database, not how to get it. We never have to think about what is stored in memory vs in some level of secondary storage, or what points to what. In other words, we have a level of abstraction that makes it much easier to write queries. In addition, the DBMS can change how the data is stored with no impact on our queries. We say that we have “physical data independence”.</p>
+</section>
+</body>
+</html>

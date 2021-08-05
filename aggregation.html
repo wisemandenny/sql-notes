@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Diane Horton" />
+  <title>2 Aggregation and Grouping</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.line-block{white-space: pre-line;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(title);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #a0a0a0;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #a0a0a0;  padding-left: 4px; }
+div.sourceCode
+  { color: #1f1c1b; }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span. { color: #1f1c1b; } /* Normal */
+code span.al { color: #bf0303; background-color: #f7e6e6; font-weight: bold; } /* Alert */
+code span.an { color: #ca60ca; } /* Annotation */
+code span.at { color: #0057ae; } /* Attribute */
+code span.bn { color: #b08000; } /* BaseN */
+code span.bu { color: #644a9b; font-weight: bold; } /* BuiltIn */
+code span.cf { color: #1f1c1b; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #924c9d; } /* Char */
+code span.cn { color: #aa5500; } /* Constant */
+code span.co { color: #898887; } /* Comment */
+code span.cv { color: #0095ff; } /* CommentVar */
+code span.do { color: #607880; } /* Documentation */
+code span.dt { color: #0057ae; } /* DataType */
+code span.dv { color: #b08000; } /* DecVal */
+code span.er { color: #bf0303; text-decoration: underline; } /* Error */
+code span.ex { color: #0095ff; font-weight: bold; } /* Extension */
+code span.fl { color: #b08000; } /* Float */
+code span.fu { color: #644a9b; } /* Function */
+code span.im { color: #ff5500; } /* Import */
+code span.in { color: #b08000; } /* Information */
+code span.kw { color: #1f1c1b; font-weight: bold; } /* Keyword */
+code span.op { color: #1f1c1b; } /* Operator */
+code span.ot { color: #006e28; } /* Other */
+code span.pp { color: #006e28; } /* Preprocessor */
+code span.re { color: #0057ae; background-color: #e0e9f8; } /* RegionMarker */
+code span.sc { color: #3daee9; } /* SpecialChar */
+code span.ss { color: #ff5500; } /* SpecialString */
+code span.st { color: #bf0303; } /* String */
+code span.va { color: #0057ae; } /* Variable */
+code span.vs { color: #bf0303; } /* VerbatimString */
+code span.wa { color: #bf0303; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://www.teach.cs.toronto.edu/~csc343h/fall/tufte.css">
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">2 Aggregation and Grouping</h1>
+<p class="author">Diane Horton</p>
+</header>
+<section class="level1">
+<h2 id="computing-on-a-column">Computing on a column</h2>
+<p>So far, we’ve learned how to choose the rows and columns we want, and to compute things on individual cell values. We often want to compute something across <em>all</em> the values in a column. For example, we might wish to know the total of a column of sales figures.</p>
+<p>SQL provides functions, such as <code>sum</code>, <code>avg</code>, <code>min</code>, <code>max</code> and <code>count</code>, that can be used in a SELECT clause to apply to a column. We call this aggregation. (My dictionary tells me that aggregation comes from root words meaning “towards” and “flock”, so when you aggregate, you can imagine that you are herding your data.)</p>
+<p>Here is an example showing the basics of aggregation.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb1-1" title="1">    <span class="co">-- First we use aggregation to get the average of all the grades in the Took</span></a>
+<a class="sourceLine" id="cb1-2" title="2">    <span class="co">-- table.  Notice that the result has just one tuple, because there is</span></a>
+<a class="sourceLine" id="cb1-3" title="3">    <span class="co">-- just one average:</span></a>
+<a class="sourceLine" id="cb1-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="fu">avg</span>(grade)</a>
+<a class="sourceLine" id="cb1-5" title="5">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took;</a>
+<a class="sourceLine" id="cb1-6" title="6">             <span class="fu">avg</span>         </a>
+<a class="sourceLine" id="cb1-7" title="7">    <span class="co">---------------------</span></a>
+<a class="sourceLine" id="cb1-8" title="8">     <span class="fl">75.8545454545454545</span></a>
+<a class="sourceLine" id="cb1-9" title="9">    (<span class="dv">1</span> <span class="kw">row</span>)</a>
+<a class="sourceLine" id="cb1-10" title="10"></a>
+<a class="sourceLine" id="cb1-11" title="11">    <span class="co">-- Notice also that SQL invented a name for this column: the name of the </span></a>
+<a class="sourceLine" id="cb1-12" title="12">    <span class="co">-- aggregation function.  If we do some fancier calculation, it uses the</span></a>
+<a class="sourceLine" id="cb1-13" title="13">    <span class="co">-- column name &quot;?column?&quot;:</span></a>
+<a class="sourceLine" id="cb1-14" title="14">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="fu">max</span>(grade) <span class="op">-</span> <span class="fu">min</span>(grade)</a>
+<a class="sourceLine" id="cb1-15" title="15">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took;</a>
+<a class="sourceLine" id="cb1-16" title="16">     ?<span class="kw">column</span>? </a>
+<a class="sourceLine" id="cb1-17" title="17">    <span class="co">----------</span></a>
+<a class="sourceLine" id="cb1-18" title="18">          <span class="dv">100</span></a>
+<a class="sourceLine" id="cb1-19" title="19"></a>
+<a class="sourceLine" id="cb1-20" title="20">    <span class="co">-- Let&#39;s give that column a better name:</span></a>
+<a class="sourceLine" id="cb1-21" title="21">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="fu">max</span>(grade) <span class="op">-</span> <span class="fu">min</span>(grade) <span class="kw">AS</span> <span class="kw">range</span></a>
+<a class="sourceLine" id="cb1-22" title="22">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took;</a>
+<a class="sourceLine" id="cb1-23" title="23">     <span class="kw">range</span> </a>
+<a class="sourceLine" id="cb1-24" title="24">    <span class="co">-------</span></a>
+<a class="sourceLine" id="cb1-25" title="25">       <span class="dv">100</span></a>
+<a class="sourceLine" id="cb1-26" title="26">    (<span class="dv">1</span> <span class="kw">row</span>)</a>
+<a class="sourceLine" id="cb1-27" title="27"></a>
+<a class="sourceLine" id="cb1-28" title="28">    <span class="co">-- count(grade) counts the number of values in the grade column.</span></a>
+<a class="sourceLine" id="cb1-29" title="29">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="fu">count</span>(grade)</a>
+<a class="sourceLine" id="cb1-30" title="30">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took;</a>
+<a class="sourceLine" id="cb1-31" title="31">     <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb1-32" title="32">    <span class="co">-------</span></a>
+<a class="sourceLine" id="cb1-33" title="33">        <span class="dv">55</span></a>
+<a class="sourceLine" id="cb1-34" title="34">    (<span class="dv">1</span> <span class="kw">row</span>)</a>
+<a class="sourceLine" id="cb1-35" title="35"></a>
+<a class="sourceLine" id="cb1-36" title="36">    <span class="co">-- If we give count a wildcard instead of a specific column name, we get</span></a>
+<a class="sourceLine" id="cb1-37" title="37">    <span class="co">-- the number of rows in the table.</span></a>
+<a class="sourceLine" id="cb1-38" title="38">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="fu">count</span>(<span class="op">*</span>)</a>
+<a class="sourceLine" id="cb1-39" title="39">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took;</a>
+<a class="sourceLine" id="cb1-40" title="40">     <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb1-41" title="41">    <span class="co">-------</span></a>
+<a class="sourceLine" id="cb1-42" title="42">        <span class="dv">55</span></a>
+<a class="sourceLine" id="cb1-43" title="43">    (<span class="dv">1</span> <span class="kw">row</span>)</a></code></pre></div>
+<p><code>count(grade)</code> and <code>count(*)</code> give the same result here: there are as many values in the <code>grade</code> column as there are rows in the table. We will learn soon that SQL allows empty cells, and in that case, <code>count(grade)</code> – or counting any other column – and <code>count(*)</code> could report different values.</p>
+<h2 id="when-duplicates-contribute">When duplicates contribute</h2>
+<p>Duplicate values contribute to aggregations. For example, if the grade 87 occurs 12 times in the table, all 12 contribute to <code>avg(grade)</code>, as well as to <code>count(grade)</code> and all the other aggregations we can compute. Of course these duplicates make no difference to <code>max(grade)</code> – 87 either is or is not the maximum; the same holds for <code>min(grade)</code>.</p>
+<p>Including duplicate values makes sense when we average a column of grades, but it is not always what we want. For example, suppose we used the Offering table to find out how many departments there are (CSC, ENV, etc.):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb2-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="fu">count</span>(dept)</a>
+<a class="sourceLine" id="cb2-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Offering;</a>
+<a class="sourceLine" id="cb2-3" title="3">     <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb2-4" title="4">    <span class="co">-------</span></a>
+<a class="sourceLine" id="cb2-5" title="5">        <span class="dv">36</span></a>
+<a class="sourceLine" id="cb2-6" title="6">    (<span class="dv">1</span> <span class="kw">row</span>)</a></code></pre></div>
+<p>Every occurence of “CSC” contributed to the count, as did every occurrence of “HIS”, and so on. We couldn’t get the answer we wanted. But if we put the keyword <code>DISTINCT</code> inside the call to <code>count</code>, each different value contributes only once.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb3-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="fu">count</span>(<span class="kw">DISTINCT</span> dept)</a>
+<a class="sourceLine" id="cb3-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Offering;</a>
+<a class="sourceLine" id="cb3-3" title="3">     <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb3-4" title="4">    <span class="co">-------</span></a>
+<a class="sourceLine" id="cb3-5" title="5">         <span class="dv">6</span></a>
+<a class="sourceLine" id="cb3-6" title="6">    (<span class="dv">1</span> <span class="kw">row</span>)</a></code></pre></div>
+<p>DISTINCT can also be used with the other aggregation functions. It does not affect <code>min</code> or <code>max</code>, of course, but does affect <code>sum</code> and <code>avg</code>.</p>
+<h2 id="including-multiple-aggregations">Including multiple aggregations</h2>
+<p>We can include more than one aggregation in a query. For example:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb4-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="fu">max</span>(grade), <span class="fu">min</span>(grade), <span class="fu">count</span>(<span class="kw">distinct</span> <span class="kw">oid</span>), <span class="fu">count</span>(<span class="op">*</span>)</a>
+<a class="sourceLine" id="cb4-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took;</a>
+<a class="sourceLine" id="cb4-3" title="3">     <span class="fu">max</span> | <span class="fu">min</span> | <span class="fu">count</span> | <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb4-4" title="4">    <span class="co">-----+-----+-------+-------</span></a>
+<a class="sourceLine" id="cb4-5" title="5">     <span class="dv">100</span> |   <span class="dv">0</span> |    <span class="dv">23</span> |    <span class="dv">54</span></a>
+<a class="sourceLine" id="cb4-6" title="6">    (<span class="dv">1</span> <span class="kw">row</span>)</a></code></pre></div>
+<p>It doesn’t matter that the aggregations don’t all pertain to the same column, and one isn’t even about a single column. It <em>does</em> matter that we are dealing with like quantities: a single max(grade), a single min(grade), and so on. This allows SQL to produce a structurally sound table for our result.</p>
+<p>Consider this:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb5-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, <span class="fu">avg</span>(grade)</a>
+<a class="sourceLine" id="cb5-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took;</a>
+<a class="sourceLine" id="cb5-3" title="3">    ERROR:  <span class="kw">column</span> <span class="ot">&quot;Took.sid&quot;</span> must appear <span class="kw">in</span> <span class="kw">the</span> <span class="kw">GROUP</span> <span class="kw">BY</span> clause <span class="kw">or</span> be used <span class="kw">in</span> an aggregate <span class="kw">function</span></a>
+<a class="sourceLine" id="cb5-4" title="4">    LINE <span class="dv">1</span>: <span class="kw">SELECT</span> sid, <span class="fu">avg</span>(grade) <span class="kw">FROM</span> Took;</a>
+<a class="sourceLine" id="cb5-5" title="5">                   ^</a></code></pre></div>
+<p>Here we are combining <code>sid</code> (of which there are many) with <code>avg(grade)</code> (of which there is one). That doesn’t produce a structurally sound table, which is why we get an error. The error message itself will make sense once we understand grouping.</p>
+<h2 id="grouping">Grouping</h2>
+<p>Suppose we are interested in getting a sense of each student’s overall grades. We might sort the Took table to get a look:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb6-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, grade</a>
+<a class="sourceLine" id="cb6-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb6-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> sid;</a>
+<a class="sourceLine" id="cb6-4" title="4"></a>
+<a class="sourceLine" id="cb6-5" title="5">      sid  | grade </a>
+<a class="sourceLine" id="cb6-6" title="6">    <span class="co">-------+-------</span></a>
+<a class="sourceLine" id="cb6-7" title="7">       <span class="dv">157</span> |    <span class="dv">99</span></a>
+<a class="sourceLine" id="cb6-8" title="8">       <span class="dv">157</span> |    <span class="dv">82</span></a>
+<a class="sourceLine" id="cb6-9" title="9">       <span class="dv">157</span> |    <span class="dv">59</span></a>
+<a class="sourceLine" id="cb6-10" title="10">       <span class="dv">157</span> |    <span class="dv">72</span></a>
+<a class="sourceLine" id="cb6-11" title="11">       <span class="dv">157</span> |    <span class="dv">89</span></a>
+<a class="sourceLine" id="cb6-12" title="12">       <span class="dv">157</span> |    <span class="dv">39</span></a>
+<a class="sourceLine" id="cb6-13" title="13">       <span class="dv">157</span> |    <span class="dv">90</span></a>
+<a class="sourceLine" id="cb6-14" title="14">       <span class="dv">157</span> |    <span class="dv">98</span></a>
+<a class="sourceLine" id="cb6-15" title="15">       <span class="dv">157</span> |    <span class="dv">59</span></a>
+<a class="sourceLine" id="cb6-16" title="16">       <span class="dv">157</span> |    <span class="dv">71</span></a>
+<a class="sourceLine" id="cb6-17" title="17">       <span class="dv">157</span> |    <span class="dv">71</span></a>
+<a class="sourceLine" id="cb6-18" title="18">       <span class="dv">157</span> |    <span class="dv">91</span></a>
+<a class="sourceLine" id="cb6-19" title="19">       <span class="dv">157</span> |    <span class="dv">82</span></a>
+<a class="sourceLine" id="cb6-20" title="20">       <span class="dv">157</span> |    <span class="dv">62</span></a>
+<a class="sourceLine" id="cb6-21" title="21">       <span class="dv">157</span> |    <span class="dv">75</span></a>
+<a class="sourceLine" id="cb6-22" title="22">     <span class="dv">11111</span> |    <span class="dv">40</span></a>
+<a class="sourceLine" id="cb6-23" title="23">     <span class="dv">11111</span> |     <span class="dv">0</span></a>
+<a class="sourceLine" id="cb6-24" title="24">     <span class="dv">11111</span> |    <span class="dv">17</span></a>
+<a class="sourceLine" id="cb6-25" title="25">     <span class="dv">11111</span> |    <span class="dv">46</span></a>
+<a class="sourceLine" id="cb6-26" title="26">     <span class="dv">11111</span> |    <span class="dv">45</span></a>
+<a class="sourceLine" id="cb6-27" title="27">     <span class="dv">98000</span> |    <span class="dv">82</span></a>
+<a class="sourceLine" id="cb6-28" title="28">     <span class="dv">98000</span> |    <span class="dv">89</span></a>
+<a class="sourceLine" id="cb6-29" title="29">     <span class="dv">98000</span> |    <span class="dv">72</span></a>
+<a class="sourceLine" id="cb6-30" title="30">     . . . etc.</a></code></pre></div>
+<p>We might then like to know each student’s average. A sensible table can be formed from pairs of an sid and an average grade. Let’s see how to get that.</p>
+<p>If we follow a SELECT-FROM-WHERE expression with GROUP BY <em><attribute></em> the tuples that have the same value for that attribute will be treated as a group, and <strong>one row will be generated for each group</strong>. For example, if we <code>GROUP BY sid</code>, all tuples about sid 157 will be collapsed down and represented as one row in the result, and the same for sid 11111 and all the others.</p>
+<p>Let’s try that. In other words, let’s change the ORDER BY to GROUP BY:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb7-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, grade</a>
+<a class="sourceLine" id="cb7-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb7-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> sid;</a>
+<a class="sourceLine" id="cb7-4" title="4">    ERROR:  <span class="kw">column</span> <span class="ot">&quot;Took.grade&quot;</span> must appear <span class="kw">in</span> <span class="kw">the</span> <span class="kw">GROUP</span> <span class="kw">BY</span> clause <span class="kw">or</span> be used <span class="kw">in</span> an aggregate <span class="kw">function</span></a>
+<a class="sourceLine" id="cb7-5" title="5">    LINE <span class="dv">1</span>: <span class="kw">SELECT</span> sid, grade</a>
+<a class="sourceLine" id="cb7-6" title="6">                        ^</a></code></pre></div>
+<p>What went wrong? We asked for one row per sid, and we want it to include sid and grade. There is one sid per sid (of course!), but there are potentially many grades per sid. This doesn’t allow SQL to make a structurally sound, rectangular, table to hold the results. But if we ask for the average grade per student, there will be exactly one per student, and the query will make sense:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb8-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, <span class="fu">avg</span>(grade)</a>
+<a class="sourceLine" id="cb8-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb8-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> sid;</a>
+<a class="sourceLine" id="cb8-4" title="4">      sid  |         <span class="fu">avg</span>         </a>
+<a class="sourceLine" id="cb8-5" title="5">    <span class="co">-------+---------------------</span></a>
+<a class="sourceLine" id="cb8-6" title="6">     <span class="dv">11111</span> | <span class="fl">29.6000000000000000</span></a>
+<a class="sourceLine" id="cb8-7" title="7">     <span class="dv">98000</span> | <span class="fl">83.2000000000000000</span></a>
+<a class="sourceLine" id="cb8-8" title="8">     <span class="dv">99132</span> | <span class="fl">76.2857142857142857</span></a>
+<a class="sourceLine" id="cb8-9" title="9">     <span class="dv">99999</span> | <span class="fl">84.5833333333333333</span></a>
+<a class="sourceLine" id="cb8-10" title="10">       <span class="dv">157</span> | <span class="fl">75.9333333333333333</span></a>
+<a class="sourceLine" id="cb8-11" title="11">    (<span class="dv">5</span> <span class="kw">rows</span>)</a>
+<a class="sourceLine" id="cb8-12" title="12"></a>
+<a class="sourceLine" id="cb8-13" title="13">    <span class="co">-- We can order this table too.  Here&#39;s one order.</span></a>
+<a class="sourceLine" id="cb8-14" title="14">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, <span class="fu">avg</span>(grade)</a>
+<a class="sourceLine" id="cb8-15" title="15">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took <span class="kw">GROUP</span> <span class="kw">BY</span> sid</a>
+<a class="sourceLine" id="cb8-16" title="16">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> sid;</a>
+<a class="sourceLine" id="cb8-17" title="17">      sid  |         <span class="fu">avg</span>         </a>
+<a class="sourceLine" id="cb8-18" title="18">    <span class="co">-------+---------------------</span></a>
+<a class="sourceLine" id="cb8-19" title="19">       <span class="dv">157</span> | <span class="fl">75.9333333333333333</span></a>
+<a class="sourceLine" id="cb8-20" title="20">     <span class="dv">11111</span> | <span class="fl">29.6000000000000000</span></a>
+<a class="sourceLine" id="cb8-21" title="21">     <span class="dv">98000</span> | <span class="fl">83.2000000000000000</span></a>
+<a class="sourceLine" id="cb8-22" title="22">     <span class="dv">99132</span> | <span class="fl">76.2857142857142857</span></a>
+<a class="sourceLine" id="cb8-23" title="23">     <span class="dv">99999</span> | <span class="fl">84.5833333333333333</span></a>
+<a class="sourceLine" id="cb8-24" title="24">    (<span class="dv">5</span> <span class="kw">rows</span>)</a>
+<a class="sourceLine" id="cb8-25" title="25"></a>
+<a class="sourceLine" id="cb8-26" title="26">    <span class="co">-- Here we order by the aggregated column.</span></a>
+<a class="sourceLine" id="cb8-27" title="27">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, <span class="fu">avg</span>(grade)</a>
+<a class="sourceLine" id="cb8-28" title="28">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb8-29" title="29">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> sid</a>
+<a class="sourceLine" id="cb8-30" title="30">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> <span class="fu">avg</span>(grade);</a>
+<a class="sourceLine" id="cb8-31" title="31">      sid  |         <span class="fu">avg</span>         </a>
+<a class="sourceLine" id="cb8-32" title="32">    <span class="co">-------+---------------------</span></a>
+<a class="sourceLine" id="cb8-33" title="33">     <span class="dv">11111</span> | <span class="fl">29.6000000000000000</span></a>
+<a class="sourceLine" id="cb8-34" title="34">       <span class="dv">157</span> | <span class="fl">75.9333333333333333</span></a>
+<a class="sourceLine" id="cb8-35" title="35">     <span class="dv">99132</span> | <span class="fl">76.2857142857142857</span></a>
+<a class="sourceLine" id="cb8-36" title="36">     <span class="dv">98000</span> | <span class="fl">83.2000000000000000</span></a>
+<a class="sourceLine" id="cb8-37" title="37">     <span class="dv">99999</span> | <span class="fl">84.5833333333333333</span></a>
+<a class="sourceLine" id="cb8-38" title="38">    (<span class="dv">5</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>We can even order by something not in the SELECT clause. Here’s a query that tries to do this, but breaks:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb9-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, <span class="fu">avg</span>(grade)</a>
+<a class="sourceLine" id="cb9-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb9-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> sid</a>
+<a class="sourceLine" id="cb9-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> <span class="kw">oid</span>;</a>
+<a class="sourceLine" id="cb9-5" title="5">    ERROR:  <span class="kw">column</span> <span class="ot">&quot;Took.oid&quot;</span> must appear <span class="kw">in</span> <span class="kw">the</span> <span class="kw">GROUP</span> <span class="kw">BY</span> clause <span class="kw">or</span> be used <span class="kw">in</span> an aggregate <span class="kw">function</span></a>
+<a class="sourceLine" id="cb9-6" title="6">    LINE <span class="dv">2</span>: <span class="kw">ORDER</span> <span class="kw">BY</span> <span class="kw">oid</span>;</a>
+<a class="sourceLine" id="cb9-7" title="7">                     ^</a></code></pre></div>
+<p>The problem is not that oid doesn’t appear in the SELECT clause. The problem is that we grouped according to sid, so every group has one sid but it doesn’t necessarily have one oid. How could we order the groups according to oid when a group may have more than one oid?</p>
+<p>In contrast, this query works because there is exactly one count(oid) per group:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb10-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, <span class="fu">avg</span>(grade)</a>
+<a class="sourceLine" id="cb10-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb10-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> sid</a>
+<a class="sourceLine" id="cb10-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> <span class="fu">count</span>(<span class="kw">oid</span>);</a>
+<a class="sourceLine" id="cb10-5" title="5">      sid  |         <span class="fu">avg</span>         </a>
+<a class="sourceLine" id="cb10-6" title="6">    <span class="co">-------+---------------------</span></a>
+<a class="sourceLine" id="cb10-7" title="7">     <span class="dv">11111</span> | <span class="fl">39.3333333333333333</span></a>
+<a class="sourceLine" id="cb10-8" title="8">     <span class="dv">99132</span> | <span class="fl">76.2857142857142857</span></a>
+<a class="sourceLine" id="cb10-9" title="9">     <span class="dv">99999</span> | <span class="fl">84.5833333333333333</span></a>
+<a class="sourceLine" id="cb10-10" title="10">     <span class="dv">98000</span> | <span class="fl">83.2000000000000000</span></a>
+<a class="sourceLine" id="cb10-11" title="11">       <span class="dv">157</span> | <span class="fl">75.9333333333333333</span></a>
+<a class="sourceLine" id="cb10-12" title="12">    (<span class="dv">5</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>Let’s add <code>count(oid)</code> to the <code>SELECT</code> clause so that we can observe that the order is correct:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb11-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, <span class="fu">avg</span>(grade), <span class="fu">count</span>(<span class="kw">oid</span>)</a>
+<a class="sourceLine" id="cb11-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Took</a>
+<a class="sourceLine" id="cb11-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> sid</a>
+<a class="sourceLine" id="cb11-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> <span class="fu">count</span>(<span class="kw">oid</span>);</a>
+<a class="sourceLine" id="cb11-5" title="5">      sid  |         <span class="fu">avg</span>         | <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb11-6" title="6">    <span class="co">-------+---------------------+-------</span></a>
+<a class="sourceLine" id="cb11-7" title="7">     <span class="dv">11111</span> | <span class="fl">29.6000000000000000</span> |     <span class="dv">5</span></a>
+<a class="sourceLine" id="cb11-8" title="8">     <span class="dv">99132</span> | <span class="fl">76.2857142857142857</span> |     <span class="dv">7</span></a>
+<a class="sourceLine" id="cb11-9" title="9">     <span class="dv">99999</span> | <span class="fl">84.5833333333333333</span> |    <span class="dv">12</span></a>
+<a class="sourceLine" id="cb11-10" title="10">     <span class="dv">98000</span> | <span class="fl">83.2000000000000000</span> |    <span class="dv">15</span></a>
+<a class="sourceLine" id="cb11-11" title="11">       <span class="dv">157</span> | <span class="fl">75.9333333333333333</span> |    <span class="dv">15</span></a>
+<a class="sourceLine" id="cb11-12" title="12">    (<span class="dv">5</span> <span class="kw">rows</span>)</a></code></pre></div>
+<h2 id="grouping-by-multiple-columns">Grouping by multiple columns</h2>
+<p>We can group by <em>multiple</em> columns. Again, let’s start out with ORDER BY, as it is a good warm-up to GROUP BY.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb12-1" title="1">    <span class="co">-- Order by 1 attribute.</span></a>
+<a class="sourceLine" id="cb12-2" title="2">    <span class="co">-- All ANT rows come together, then all CSC rows, and so on.</span></a>
+<a class="sourceLine" id="cb12-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span></a>
+<a class="sourceLine" id="cb12-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Offering</a>
+<a class="sourceLine" id="cb12-5" title="5">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> dept;</a>
+<a class="sourceLine" id="cb12-6" title="6">     <span class="kw">oid</span> | cnum | dept | term  | instructor </a>
+<a class="sourceLine" id="cb12-7" title="7">    <span class="co">-----+------+------+-------+------------</span></a>
+<a class="sourceLine" id="cb12-8" title="8">      <span class="dv">11</span> |  <span class="dv">200</span> | ANT  | <span class="dv">20089</span> | Zorich</a>
+<a class="sourceLine" id="cb12-9" title="9">      <span class="dv">12</span> |  <span class="dv">203</span> | ANT  | <span class="dv">20089</span> | Davies</a>
+<a class="sourceLine" id="cb12-10" title="10">      <span class="dv">31</span> |  <span class="dv">203</span> | ANT  | <span class="dv">20081</span> | Zorich</a>
+<a class="sourceLine" id="cb12-11" title="11">       <span class="dv">4</span> |  <span class="dv">320</span> | CSC  | <span class="dv">20089</span> | Jepson</a>
+<a class="sourceLine" id="cb12-12" title="12">       <span class="dv">5</span> |  <span class="dv">207</span> | CSC  | <span class="dv">20089</span> | Craig</a>
+<a class="sourceLine" id="cb12-13" title="13">       <span class="dv">6</span> |  <span class="dv">207</span> | CSC  | <span class="dv">20089</span> | Gries</a>
+<a class="sourceLine" id="cb12-14" title="14">       <span class="dv">7</span> |  <span class="dv">148</span> | CSC  | <span class="dv">20089</span> | Jepson</a>
+<a class="sourceLine" id="cb12-15" title="15">       <span class="dv">8</span> |  <span class="dv">148</span> | CSC  | <span class="dv">20089</span> | Chechik</a>
+<a class="sourceLine" id="cb12-16" title="16">    etc.</a>
+<a class="sourceLine" id="cb12-17" title="17"></a>
+<a class="sourceLine" id="cb12-18" title="18">    <span class="co">-- Order by 2 attributes.</span></a>
+<a class="sourceLine" id="cb12-19" title="19">    <span class="co">-- This result is the same, except that when there is a tie by dept,</span></a>
+<a class="sourceLine" id="cb12-20" title="20">    <span class="co">-- the rows for that dept are in ORDER BY cnum.</span></a>
+<a class="sourceLine" id="cb12-21" title="21">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span></a>
+<a class="sourceLine" id="cb12-22" title="22">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Offering</a>
+<a class="sourceLine" id="cb12-23" title="23">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> dept, cnum;</a>
+<a class="sourceLine" id="cb12-24" title="24">     <span class="kw">oid</span> | cnum | dept | term  | instructor </a>
+<a class="sourceLine" id="cb12-25" title="25">    <span class="co">-----+------+------+-------+------------</span></a>
+<a class="sourceLine" id="cb12-26" title="26">      <span class="dv">11</span> |  <span class="dv">200</span> | ANT  | <span class="dv">20089</span> | Zorich</a>
+<a class="sourceLine" id="cb12-27" title="27">      <span class="dv">31</span> |  <span class="dv">203</span> | ANT  | <span class="dv">20081</span> | Zorich</a>
+<a class="sourceLine" id="cb12-28" title="28">      <span class="dv">12</span> |  <span class="dv">203</span> | ANT  | <span class="dv">20089</span> | Davies</a>
+<a class="sourceLine" id="cb12-29" title="29">       <span class="dv">7</span> |  <span class="dv">148</span> | CSC  | <span class="dv">20089</span> | Jepson</a>
+<a class="sourceLine" id="cb12-30" title="30">      <span class="dv">27</span> |  <span class="dv">148</span> | CSC  | <span class="dv">20081</span> | Jepson</a>
+<a class="sourceLine" id="cb12-31" title="31">       <span class="dv">8</span> |  <span class="dv">148</span> | CSC  | <span class="dv">20089</span> | Chechik</a>
+<a class="sourceLine" id="cb12-32" title="32">      <span class="dv">28</span> |  <span class="dv">148</span> | CSC  | <span class="dv">20081</span> | Miller</a>
+<a class="sourceLine" id="cb12-33" title="33">      <span class="dv">25</span> |  <span class="dv">207</span> | CSC  | <span class="dv">20081</span> | Craig</a>
+<a class="sourceLine" id="cb12-34" title="34">    etc.</a></code></pre></div>
+<p>Now let’s try grouping by the same two attributes. This won’t work:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb13-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> <span class="op">*</span></a>
+<a class="sourceLine" id="cb13-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Offering</a>
+<a class="sourceLine" id="cb13-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> dept, cnum;</a>
+<a class="sourceLine" id="cb13-4" title="4">    ERROR:  <span class="kw">column</span> <span class="ot">&quot;Offering.oid&quot;</span> must appear <span class="kw">in</span> <span class="kw">the</span> <span class="kw">GROUP</span> <span class="kw">BY</span> clause <span class="kw">or</span> be used <span class="kw">in</span> an aggregate <span class="kw">function</span></a>
+<a class="sourceLine" id="cb13-5" title="5">    LINE <span class="dv">1</span>: <span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> Offering <span class="kw">GROUP</span> <span class="kw">BY</span> dept, cnum;</a></code></pre></div>
+<p>By saying “<code>GROUP BY dept, cnum</code>”, we asked for one row per dept-cnum combination, such as ENV-200. But we also asked to include columns <code>oid</code>, <code>term</code>, and <code>instructor</code>. Yet we can’t expect a dept-cnum combination to have just one <code>oid</code>, <code>term</code>, and <code>instructor</code>, so the query doesn’t make sense. If we were to aggregate those columns by dept and cnum, there <em>would</em> be just one value per dept-cnum combination. For example, here we ask for <code>count(cnum)</code> rather than <code>cnum</code> itself, so the query makes perfect sense:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb14-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> dept, cnum, <span class="fu">count</span>(cnum) </a>
+<a class="sourceLine" id="cb14-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Offering</a>
+<a class="sourceLine" id="cb14-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> dept, cnum;</a>
+<a class="sourceLine" id="cb14-4" title="4">     dept | cnum | <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb14-5" title="5">    <span class="co">------+------+-------</span></a>
+<a class="sourceLine" id="cb14-6" title="6">     ENV  |  <span class="dv">200</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb14-7" title="7">     ENG  |  <span class="dv">235</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb14-8" title="8">     CSC  |  <span class="dv">207</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb14-9" title="9">     EEB  |  <span class="dv">216</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb14-10" title="10">     EEB  |  <span class="dv">263</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb14-11" title="11">     HIS  |  <span class="dv">296</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb14-12" title="12">     CSC  |  <span class="dv">343</span> |     <span class="dv">5</span></a>
+<a class="sourceLine" id="cb14-13" title="13">     HIS  |  <span class="dv">220</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb14-14" title="14">     CSC  |  <span class="dv">263</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb14-15" title="15">     ENG  |  <span class="dv">205</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb14-16" title="16">     EEB  |  <span class="dv">150</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb14-17" title="17">     ANT  |  <span class="dv">203</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb14-18" title="18">     CSC  |  <span class="dv">320</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb14-19" title="19">     CSC  |  <span class="dv">148</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb14-20" title="20">     ENG  |  <span class="dv">110</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb14-21" title="21">     ENV  |  <span class="dv">320</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb14-22" title="22">     ANT  |  <span class="dv">200</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb14-23" title="23">    (<span class="dv">17</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>If we wish to order the results of our query, the ORDER BY clause comes after the GROUP BY clause:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb15-1" title="1">    csc343h<span class="op">-</span>prof<span class="op">=&gt;</span> <span class="kw">SELECT</span> dept, cnum, <span class="fu">count</span>(cnum)</a>
+<a class="sourceLine" id="cb15-2" title="2">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">FROM</span> Offering</a>
+<a class="sourceLine" id="cb15-3" title="3">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> dept, cnum</a>
+<a class="sourceLine" id="cb15-4" title="4">    csc343h<span class="op">-</span>prof<span class="op">-&gt;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> dept;</a>
+<a class="sourceLine" id="cb15-5" title="5">     dept | cnum | <span class="fu">count</span> </a>
+<a class="sourceLine" id="cb15-6" title="6">    <span class="co">------+------+-------</span></a>
+<a class="sourceLine" id="cb15-7" title="7">     ANT  |  <span class="dv">200</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb15-8" title="8">     ANT  |  <span class="dv">203</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb15-9" title="9">     CSC  |  <span class="dv">148</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb15-10" title="10">     CSC  |  <span class="dv">207</span> |     <span class="dv">4</span></a>
+<a class="sourceLine" id="cb15-11" title="11">     CSC  |  <span class="dv">263</span> |     <span class="dv">3</span></a>
+<a class="sourceLine" id="cb15-12" title="12">     CSC  |  <span class="dv">320</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb15-13" title="13">     CSC  |  <span class="dv">343</span> |     <span class="dv">5</span></a>
+<a class="sourceLine" id="cb15-14" title="14">     EEB  |  <span class="dv">150</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb15-15" title="15">     EEB  |  <span class="dv">216</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb15-16" title="16">     EEB  |  <span class="dv">263</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb15-17" title="17">     ENG  |  <span class="dv">110</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb15-18" title="18">     ENG  |  <span class="dv">205</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb15-19" title="19">     ENG  |  <span class="dv">235</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb15-20" title="20">     ENV  |  <span class="dv">200</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb15-21" title="21">     ENV  |  <span class="dv">320</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb15-22" title="22">     HIS  |  <span class="dv">220</span> |     <span class="dv">2</span></a>
+<a class="sourceLine" id="cb15-23" title="23">     HIS  |  <span class="dv">296</span> |     <span class="dv">1</span></a>
+<a class="sourceLine" id="cb15-24" title="24">    (<span class="dv">17</span> <span class="kw">rows</span>)</a></code></pre></div>
+<h2 id="restrictions-on-aggregation">Restrictions on aggregation</h2>
+<p>We’ve seen some restrictions on what is allowed when we aggregate. These all have to do with ensuring the result is putting together like quantities, such as one sid with one average grade and one maximum grade, or one department and course number combination with the count of offerings of that course. To summarize the rules, if any aggregation is used in a query, then each element of the SELECT list must be either:</p>
+<ul>
+<li>aggregated, or</li>
+<li>an attribute in the GROUP BY list.</li>
+</ul>
+<p>You may notice occassionally that you are able to slightly break this rule. For instance, postgreSQL will permit the following:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb16-1" title="1">csc343h<span class="op">-</span>dianeh<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, firstname, surname      </a>
+<a class="sourceLine" id="cb16-2" title="2">csc343h<span class="op">-</span>dianeh<span class="op">-&gt;</span> <span class="kw">FROM</span> Student</a>
+<a class="sourceLine" id="cb16-3" title="3">csc343h<span class="op">-</span>dianeh<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> sid;</a>
+<a class="sourceLine" id="cb16-4" title="4">  sid  | firstname |  surname   </a>
+<a class="sourceLine" id="cb16-5" title="5"><span class="co">-------+-----------+------------</span></a>
+<a class="sourceLine" id="cb16-6" title="6"> <span class="dv">98000</span> | William   | Fairgrieve</a>
+<a class="sourceLine" id="cb16-7" title="7"> <span class="dv">99132</span> | Avery     | Marchmount</a>
+<a class="sourceLine" id="cb16-8" title="8"> <span class="dv">99999</span> | Afsaneh   | Ali</a>
+<a class="sourceLine" id="cb16-9" title="9">   <span class="dv">157</span> | Leilani   | Lakemeyer</a>
+<a class="sourceLine" id="cb16-10" title="10"> <span class="dv">11111</span> | Homer     | Simpson</a>
+<a class="sourceLine" id="cb16-11" title="11">(<span class="dv">5</span> <span class="kw">rows</span>)</a></code></pre></div>
+<p>Columns <code>firstname</code> and <code>surname</code> are neither aggregated nor in the GROUP BY, but this query still makes sense because each <code>sid</code> has exactly one value for <code>firstname</code> and for <code>surname</code> – <code>sid</code> is a primary key, after all. However, the query below doesn’t work because a single surname can occur in multiple rows, and thus be associated with multiple values for <code>sid</code>, <code>firstname</code>, and <code>surname</code>.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode sql"><code class="sourceCode sql"><a class="sourceLine" id="cb17-1" title="1">csc343h<span class="op">-</span>dianeh<span class="op">=&gt;</span> <span class="kw">SELECT</span> sid, firstname, surname</a>
+<a class="sourceLine" id="cb17-2" title="2">csc343h<span class="op">-</span>dianeh<span class="op">-&gt;</span> <span class="kw">FROM</span> Student</a>
+<a class="sourceLine" id="cb17-3" title="3">csc343h<span class="op">-</span>dianeh<span class="op">-&gt;</span> <span class="kw">GROUP</span> <span class="kw">BY</span> surname;</a>
+<a class="sourceLine" id="cb17-4" title="4">ERROR:  <span class="kw">column</span> <span class="ot">&quot;student.sid&quot;</span> must appear <span class="kw">in</span> <span class="kw">the</span> <span class="kw">GROUP</span> <span class="kw">BY</span> clause <span class="kw">or</span> be used <span class="kw">in</span> an aggregate <span class="kw">function</span></a>
+<a class="sourceLine" id="cb17-5" title="5">LINE <span class="dv">1</span>: <span class="kw">SELECT</span> sid, firstname, surname</a></code></pre></div>
+</section>
+</body>
+</html>
